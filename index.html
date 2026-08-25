@@ -568,8 +568,8 @@ button:active{transform:scale(.975)!important}
   font-size:10px;
   font-weight:800;
   letter-spacing:.42em;
-  opacity:0;
-  animation:titleFadeUp .8s .15s forwards;
+  opacity:1;
+  animation:titleFadeUp .8s .15s both;
 }
 .title-lockup{
   width:min(100%,500px);
@@ -585,11 +585,11 @@ button:active{transform:scale(.975)!important}
 }
 .title-word{
   display:block;
-  opacity:0;
+  opacity:1;
   color:#f6ead0;
   text-shadow:0 0 34px rgba(var(--theme-rgb),.12);
-  transform:translateY(34px);
-  animation:titleWordIn 1s cubic-bezier(.18,.8,.2,1) forwards;
+  transform:translateY(0);
+  animation:titleWordIn 1s cubic-bezier(.18,.8,.2,1) both;
 }
 .title-love{align-self:flex-start;animation-delay:.25s}
 .title-style{align-self:center;margin-top:.12em;animation-delay:.48s}
@@ -618,8 +618,8 @@ button:active{transform:scale(.975)!important}
   font-size:11px;
   font-weight:800;
   letter-spacing:.34em;
-  opacity:0;
-  animation:titleFadeUp .8s 1.2s forwards;
+  opacity:1;
+  animation:titleFadeUp .8s 1.2s both;
 }
 .title-enter::after{
   content:"";
@@ -639,11 +639,11 @@ button:active{transform:scale(.975)!important}
   color:rgba(255,255,255,.32);
   font-size:9px;
   letter-spacing:.18em;
-  opacity:0;
-  animation:titleFadeUp .8s 1.38s forwards;
+  opacity:1;
+  animation:titleFadeUp .8s 1.38s both;
 }
-@keyframes titleWordIn{to{opacity:1;transform:translateY(0)}}
-@keyframes titleFadeUp{to{opacity:1;transform:translateY(0)}}
+@keyframes titleWordIn{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:translateY(0)}}
+@keyframes titleFadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes titleLine{to{width:min(62%,290px)}}
 @keyframes titleBeam{0%{opacity:0;transform:translateX(-180px) rotate(28deg)}35%{opacity:.55}100%{opacity:0;transform:translateX(220px) rotate(28deg)}}
 @keyframes titleGrain{0%,100%{transform:translate(0)}25%{transform:translate(-1%,1%)}50%{transform:translate(1%,-1%)}75%{transform:translate(1%,1%)}}
@@ -662,6 +662,7 @@ button:active{transform:scale(.975)!important}
 </head>
 <body>
 
+<!-- TITLE SCREEN VERIFIED v2 -->
 <div id="titleScreen" class="title-screen" aria-label="LOVE STYLE MAP タイトル画面" role="dialog" aria-modal="true">
   <div class="title-screen-inner">
     <div class="title-screen-kicker">YOUR RELATIONSHIP BLUEPRINT</div>
@@ -672,7 +673,7 @@ button:active{transform:scale(.975)!important}
     </div>
     <div class="title-divider"></div>
     <button id="titleEnter" class="title-enter" type="button" onclick="closeTitleScreen()">ENTER</button>
-    <div class="title-enter-note">画面をタップして診断を始める</div>
+    <div class="title-enter-note">ENTERをタップして診断を始める</div>
   </div>
 </div>
 
@@ -2466,10 +2467,6 @@ function playDiagnosisStartSound(){
     const screen=document.getElementById('titleScreen');
     if(!screen)return;
     document.body.style.overflow='hidden';
-    screen.addEventListener('click',function(event){
-      if(event.target.closest('#titleEnter'))return;
-      closeTitleScreen();
-    });
     document.addEventListener('keydown',function(event){
       if((event.key==='Enter'||event.key==='Escape'||event.key===' ')&&document.getElementById('titleScreen')){
         event.preventDefault();
