@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#101013">
-<title>Love Style Map｜16タイプ恋愛スタイル診断</title>
-<meta name="description" content="あなたの恋愛スタイルを分析し、相性コードで相手との関係性も診断できるオリジナル診断。">
+<title>Love Style Map｜「好き」がわかれば、恋愛は変わる。</title>
+<meta name="description" content="恋愛を当てるのではなく、理解する。16の質問から、あなたの恋愛設計図を読み解くLove Style Map。">
 <style>
 :root{
   --bg:#0d0d10;
@@ -44,7 +44,22 @@ button{cursor:pointer}
 }
 .hero{text-align:center;padding:34px 16px 26px}
 .hero h1{font-size:clamp(34px,9vw,62px);line-height:1.08;margin:0 0 14px;letter-spacing:.02em}
-.hero h1 span{color:var(--accent)}
+.hero h1 span{color:inherit}
+.hero-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  font-size:clamp(32px,8.2vw,58px)!important;
+  line-height:1.18!important;
+}
+.hero-line{
+  display:block;
+  white-space:nowrap;
+}
+.hero-accent{
+  color:var(--accent)!important;
+}
 .hero p{color:var(--muted);margin:0 auto;max-width:560px}
 .panel{
   background:linear-gradient(180deg,rgba(31,31,38,.96),rgba(20,20,25,.98));
@@ -135,6 +150,8 @@ button{cursor:pointer}
 .notice{padding:12px 14px;border-radius:12px;background:#18181e;color:var(--muted);font-size:13px;margin-top:14px}
 .footer{text-align:center;color:#77717a;font-size:12px;padding-top:35px}
 @media(max-width:480px){
+  .hero-copy{font-size:clamp(29px,7.7vw,39px)!important;gap:4px}
+  .hero{padding-left:4px;padding-right:4px}
   .panel{padding:19px;border-radius:22px}
   .question{font-size:21px}
   .type-name{font-size:34px}
@@ -152,8 +169,11 @@ button{cursor:pointer}
   <section id="startScreen" class="panel">
     <div class="hero">
       <div class="kicker">YOUR RELATIONSHIP BLUEPRINT</div>
-      <h1>あなたの恋愛には、<br><span>まだ名前がない。</span></h1>
-      <p>16の質問から、心の距離・愛情表現・安心と刺激・自立性を分析。恋愛偏差値や一途度まで含めて、あなただけの恋愛スタイルを言葉にします。</p>
+      <h1 class="hero-copy">
+      <span class="hero-line">「好き」がわかれば、</span>
+      <span class="hero-line hero-accent">恋愛は変わる。</span>
+    </h1>
+      <p>恋愛を当てるのではなく、理解する。<br>16の質問から、恋愛の「理由」を見つけます。</p>
       <div class="start-grid">
         <input id="nickname" class="compat-input" maxlength="16"
           placeholder="名前・ニックネームを入力"
@@ -170,7 +190,7 @@ button{cursor:pointer}
 
   <section id="quizScreen" class="panel hidden">
     <div class="progress-shell"><div id="progress" class="progress"></div></div>
-    <div class="q-meta"><span id="qCount">QUESTION 1 / 12</span><span>直感で選んでください</span></div>
+    <div class="q-meta"><span id="qCount">QUESTION 1 / 16</span><span>あなたの恋愛設計図を解析します</span></div>
     <div id="question" class="question"></div>
     <div id="answers" class="answers"></div>
   </section>
@@ -178,15 +198,15 @@ button{cursor:pointer}
   <section id="loadingScreen" class="panel hidden">
     <div class="loading">
       <div class="orbit"></div>
-      <h2>あなたの恋愛地図を作成中</h2>
-      <p class="small">距離感・表現・安定性・自立性を分析しています…</p>
+      <h2>あなたの恋愛設計図を解析中</h2>
+      <p class="small">恋愛傾向・愛情表現・安心感・自立性を読み解いています…</p>
     </div>
   </section>
 
   <section id="resultScreen" class="hidden">
     <div class="panel">
       <div class="result-head">
-        <div class="kicker">YOUR LOVE STYLE</div>
+        <div class="kicker">YOUR LOVE STYLE</div><p class="small" style="margin:8px 0 0">恋愛を当てるのではなく、理解する。</p>
         <div id="typeIcon" class="type-icon">🌙</div>
         <h1 id="typeName" class="type-name"></h1>
         <p id="typeSub" class="type-sub"></p>
@@ -209,14 +229,26 @@ button{cursor:pointer}
       <div id="longResult"></div>
 
       <div class="section">
-        <div class="kicker">PERSONAL ANALYSIS — BETA</div>
-        <h2 id="aiHeading">AIパーソナル分析</h2>
-        <p>診断結果の4つの傾向を組み合わせて、今のあなた向けの分析文を作成します。</p>
+        <div class="kicker">AI ANALYSIS</div>
+        <h2 id="aiHeading">AI分析レポート</h2>
+        <p>診断では見えなかった「なぜそうなるのか」まで、回答内容と恋愛ステータスから読み解きます。</p>
         <button id="aiButton" class="primary" style="width:100%;margin-top:18px"
-          onclick="generateAIAnalysis()">AI分析をはじめる</button>
+          onclick="startAIWithAd()">広告を見てAI分析を開く</button>
+
         <div id="aiAnalysis" class="compat-result hidden"></div>
+
+        <div id="aiQuestionArea" class="hidden" style="margin-top:16px">
+          <p class="small">気になる項目を選ぶか、自由に質問してください。</p>
+          <div class="relations" id="aiSuggestions"></div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px">
+            <input id="aiQuestionInput" class="compat-input" placeholder="例：恋人から見た私は？">
+            <button class="secondary" onclick="askAIQuestion()">質問</button>
+          </div>
+          <div id="aiAnswer" class="compat-result hidden"></div>
+        </div>
+
         <p class="small" style="margin-top:12px">
-          β版は診断データから端末内で文章を生成します。入力した名前は外部へ送信されません。
+          β版は診断データから端末内で文章を生成します。相手の本心や未来を断定するものではありません。
         </p>
       </div>
     </div>
@@ -259,14 +291,14 @@ button{cursor:pointer}
     <div id="compatResultOnly" class="compat-result hidden"></div>
   </section>
 
-  <div class="footer">© LOVE STYLE MAP — Original Relationship Experience</div>
+  <div class="footer">© LOVE STYLE MAP — 恋愛を当てるのではなく、理解する。</div>
 </div>
 
 <div id="adOverlay" class="ad-overlay hidden">
   <div class="ad-card">
     <div class="kicker">SPONSORED</div>
     <div class="ad-space">広告掲載スペース<br>（デモ表示）</div>
-    <p id="adCount">3秒後に画像を作成します</p>
+    <p id="adCount">準備しています…</p>
   </div>
 </div>
 
@@ -461,28 +493,13 @@ function showResult(){
     <div class="stat"><div class="stat-top"><span>${l}</span><strong>${allValues[i]}%</strong></div>
     <div class="bar"><span style="width:${allValues[i]}%"></span></div></div>`).join("");
 
-  const namedHeadings=[
-    `${userName}さんの恋愛スタイル`,
-    `${userName}さんに最適な相手は`,
-    `${userName}さんが相手に求めているのは`,
-    `恋をしたときの${userName}さん`,
-    `${userName}さんが無意識にしている恋愛のクセ`,
-    `${userName}さんの本当は傷つきやすい部分`,
-    `${userName}さんのLINE・連絡の特徴`,
-    `${userName}さんがケンカしたとき`,
-    `${userName}さんと長く付き合うと`,
-    `${userName}さんが別れたあと`,
-    `${userName}さんへのメッセージ`
-  ];
-  document.getElementById("longResult").innerHTML=
-    `<div class="section"><h2>${namedHeadings[0]}</h2><p>${nameText(t.desc)}</p></div>`+
-    sections.map((s,i)=>`<div class="section"><h2>${namedHeadings[i+1]}</h2><p>${nameText(personalize(s[1],i))}</p>
-    ${i===1||i===5||i===6?`<div class="tip">💡 ${userName}さんへのワンポイント：${nameText(tipFor(i))}</div>`:""}</div>`).join("");
-  document.getElementById("aiHeading").textContent=`${userName}さんのAIパーソナル分析`;
+  const concise = buildConciseResult(t);
+  document.getElementById("longResult").innerHTML=concise;
+  document.getElementById("aiHeading").textContent=`${userName}さんのAI分析レポート`;
   document.getElementById("aiAnalysis").classList.add("hidden");
   document.getElementById("aiAnalysis").innerHTML="";
   document.getElementById("aiButton").disabled=false;
-  document.getElementById("aiButton").textContent="AI分析をはじめる";
+  document.getElementById("aiButton").textContent="広告を見てAI分析を開く";
 
   renderRelations("relations",false);
   window.scrollTo({top:0,behavior:"smooth"});
@@ -634,6 +651,69 @@ function roundRect(ctx,x,y,w,h,r,fill,stroke){
   ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
   if(fill)ctx.fill();if(stroke)ctx.stroke();
 }
+
+function buildConciseResult(t){
+  const v=result.metrics.values;
+  const strongest=[
+    {label:"愛情表現",value:v[1]},
+    {label:"安心感",value:v[2]},
+    {label:"自立性",value:v[3]},
+    {label:"行動力",value:v[0]}
+  ].sort((a,b)=>b.value-a.value)[0].label;
+
+  const bestPartner =
+    v[3]>=70 ? "自分の世界を持ちながら、必要なときにはきちんと気持ちを伝えてくれる人" :
+    v[2]>=70 ? "約束や連絡を雑にせず、安心を言葉と行動で積み重ねられる人" :
+    v[1]>=70 ? "愛情を受け取ったら、分かりやすく返してくれる人" :
+    "急かさずに話を聞き、少しずつ信頼を育ててくれる人";
+
+  const caution =
+    result.metrics.jealousy>=68 ? "相手を大切に思うほど、小さな反応まで気にしすぎることです。気持ちを推測し続けるより、早めに一言確認するとすれ違いを減らせます。" :
+    result.metrics.loyalty>=78 ? "好きな人を優先しすぎて、自分の希望を後回しにすることです。支えることと我慢することを分ける意識が大切です。" :
+    result.metrics.strategy>=68 ? "正解を考えすぎて、自然な気持ちを出すタイミングを逃すことです。完璧な言葉より、素直な一言の方が届きます。" :
+    "相手に合わせることを優先しすぎて、本音が見えにくくなることです。小さな希望から伝えると関係が安定します。";
+
+  const summary = `${userName}さんの回答で最も強く表れたのは「${strongest}」です。${t.desc} `
+    + (result.metrics.warmth>=70
+      ? "人を好きになったときの温度が高く、相手を安心させる力があります。"
+      : "感情に流されすぎず、相手との距離を丁寧に選べる強さがあります。")
+    + " 一方で、無理をしてまで相手に合わせる必要はありません。自分の気持ちも同じくらい大切にすると、より長く穏やかな関係を築けます。";
+
+  const today =
+    result.metrics.jealousy>=68 ? "今日は、相手の反応を想像する前に、自分の気持ちを一言だけ言葉にしてみてください。" :
+    result.metrics.strategy>=68 ? "今日は、考えすぎる前に『会えてうれしい』『また話したい』のどちらかを素直に伝えてみてください。" :
+    result.metrics.loyalty>=78 ? "今日は、相手のためではなく自分が心地よく過ごせる時間を一つ作ってください。" :
+    "今日は、相手に求めることを一つだけ、責めずに希望として伝えてみてください。";
+
+  return `
+    <div class="section">
+      <div class="kicker">CORE PROFILE</div>
+      <h2>${userName}さんの恋愛スタイル</h2>
+      <p>${nameText(t.desc)} ${result.metrics.warmth>=70?"好きな人への温度が高く、関係を前向きに育てる力があります。":"相手との距離を丁寧に選び、無理のない関係を作れる人です。"}</p>
+    </div>
+
+    <div class="section">
+      <h2>${userName}さんに最適な相手は</h2>
+      <p>${bestPartner}です。性格が完全に同じ人よりも、${userName}さんの気持ちを受け止めながら、必要な場面では言葉で安心を返してくれる相手と長く続きやすいでしょう。</p>
+    </div>
+
+    <div class="section">
+      <h2>恋愛で気をつけたいこと</h2>
+      <p>${caution}</p>
+    </div>
+
+    <div class="section">
+      <div class="kicker">AI SUMMARY</div>
+      <h2>診断から見えたこと</h2>
+      <p>${summary}</p>
+    </div>
+
+    <div class="section">
+      <div class="tip"><strong>今日の小さな一歩</strong><br>${today}</div>
+    </div>
+  `;
+}
+
 function nameText(text){
   return String(text)
     .replaceAll("あなたは",`${userName}さんは`)
@@ -644,6 +724,33 @@ function nameText(text){
     .replaceAll("あなたと",`${userName}さんと`)
     .replaceAll("あなたへ",`${userName}さんへ`)
     .replaceAll("あなた",`${userName}さん`);
+}
+
+
+function startAIWithAd(){
+  if(!result)return;
+  showAdThen(()=>{
+    generateAIAnalysis();
+  },"診断では見えなかった理由を読み解いています");
+}
+
+function showAdThen(callback,message){
+  const overlay=document.getElementById("adOverlay");
+  const count=document.getElementById("adCount");
+  overlay.classList.remove("hidden");
+  let n=4;
+  count.textContent=`${message}… ${n}秒`;
+  const timer=setInterval(()=>{
+    n--;
+    count.textContent=n>0?`${message}… ${n}秒`:"分析を開いています…";
+    if(n<=0){
+      clearInterval(timer);
+      setTimeout(()=>{
+        overlay.classList.add("hidden");
+        callback();
+      },500);
+    }
+  },1000);
 }
 
 function generateAIAnalysis(){
@@ -722,14 +829,88 @@ function generateAIAnalysis(){
     `;
     btn.textContent="AI分析をもう一度作る";
     btn.disabled=false;
+    renderAISuggestions();
+    document.getElementById("aiQuestionArea").classList.remove("hidden");
     box.scrollIntoView({behavior:"smooth",block:"start"});
   },1300);
+}
+
+
+function renderAISuggestions(){
+  const items=[
+    "私に向いている人",
+    "恋人から見た私は？",
+    "LINEではどんなタイプ？",
+    "結婚したらどうなる？",
+    "失恋しやすい理由",
+    "長続きするコツ"
+  ];
+  const box=document.getElementById("aiSuggestions");
+  box.innerHTML="";
+  items.forEach(text=>{
+    const b=document.createElement("button");
+    b.className="relation-btn";
+    b.textContent=text;
+    b.onclick=()=>{
+      document.getElementById("aiQuestionInput").value=text;
+      askAIQuestion();
+    };
+    box.appendChild(b);
+  });
+}
+
+function askAIQuestion(){
+  const input=document.getElementById("aiQuestionInput");
+  const q=(input.value||"").trim();
+  if(!q)return;
+  const out=document.getElementById("aiAnswer");
+  out.classList.remove("hidden");
+  out.innerHTML=`<p>${userName}さんの診断結果を確認しています…</p>`;
+
+  setTimeout(()=>{
+    let answer="";
+    if(/向いて|相手/.test(q)){
+      answer=`${userName}さんには、${result.metrics.values[3]>=70?"自由を尊重しながら必要なときには言葉で戻ってきてくれる人":"気持ちを曖昧にせず、安心を行動でも示してくれる人"}が向いています。同じ性格かどうかより、話し合いを避けない相手かどうかが大切です。`;
+    }else if(/恋人から|どう見/.test(q)){
+      answer=`恋人から見ると、${userName}さんは${result.metrics.warmth>=70?"愛情が分かりやすく、そばにいると安心できる人":"落ち着いていて、自分の時間も大切にできる人"}に映りやすいでしょう。ただ、我慢していることまで平気に見せると、本音が伝わりにくくなる場合があります。`;
+    }else if(/LINE|連絡/.test(q)){
+      answer=`${userName}さんは、返信速度よりも言葉の温度を気にしやすいタイプです。短い返事でも気持ちが伝われば安心できますが、雑な反応が続くと距離を取りやすくなります。`;
+    }else if(/結婚/.test(q)){
+      answer=`結婚後は、${result.metrics.loyalty>=75?"家庭や約束を大切にする安定したパートナー":"互いの自由を守りながら支え合うパートナー"}になりやすいでしょう。役割を一人で背負い込まず、早めに相談できる関係が向いています。`;
+    }else if(/失恋|別れ/.test(q)){
+      answer=`${userName}さんは、別れそのものより「なぜこうなったのか分からない状態」に長く苦しみやすい傾向があります。答えの出ない推測を続けるより、自分が次に大切にしたい条件を書き出すと回復が早まります。`;
+    }else if(/長続き|続く/.test(q)){
+      answer=`長続きの鍵は、相手に合わせることではなく、二人のルールを一緒に作ることです。連絡頻度、ひとりの時間、ケンカ後の戻り方を早めに話せると、${userName}さんの良さが最も活きます。`;
+    }else{
+      answer=`${userName}さんの診断結果では、一途さが${result.metrics.loyalty}%、自立性が${result.metrics.values[3]}%でした。このバランスを見ると、相手を大切にしながらも、自分の気持ちを我慢しすぎないことが重要です。質問の状況をもう少し具体的にすると、さらに絞って考えられます。`;
+    }
+
+    const extra = result.metrics.jealousy>=65
+      ? "もう一つ気になるのは、相手の反応を深読みしやすい点です。"
+      : "もう一つ気になるのは、平気なふりをして本音を後回しにしやすい点です。";
+
+    out.innerHTML=`
+      <div class="kicker">AI RESPONSE</div>
+      <h2 style="margin:8px 0 12px">${q}</h2>
+      <p>${answer}</p>
+      <div class="tip">${extra}<br><button class="ghost" style="margin-top:10px" onclick="askMoreInsight()">詳しく見る</button></div>
+    `;
+  },800);
+}
+
+function askMoreInsight(){
+  const out=document.getElementById("aiAnswer");
+  const text = result.metrics.jealousy>=65
+    ? `${userName}さんは、相手を信じたい気持ちが強いからこそ、小さな変化にも敏感になります。不安を感じたときは、結論を出す前に「今少し不安になっている」と感情だけを共有するのがおすすめです。`
+    : `${userName}さんは、自分で整理できる力があるぶん、助けてほしい瞬間まで一人で抱えやすい傾向があります。弱さを見せることは依存ではなく、信頼を深める行動です。`;
+  out.innerHTML += `<div class="section"><h2>さらに詳しく</h2><p>${text}</p></div>`;
 }
 
 function restartAll(){
   hideAll();
   const input=document.getElementById("nickname");
   if(input)input.value=userName;
+  document.getElementById("aiQuestionArea")?.classList.add("hidden");
   document.getElementById("startScreen").classList.remove("hidden");
   window.scrollTo({top:0,behavior:"smooth"});
 }
