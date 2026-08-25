@@ -241,9 +241,18 @@ button{cursor:pointer}
         <p id="typeSub" class="type-sub"></p>
 
         <div class="code-box">
-          <div class="small">あなたの LSM CODE</div>
+          <div class="small">二人の相性を見るための LSM CODE</div>
           <div id="lsmCode" class="code"></div>
-          <button class="ghost" style="margin-top:10px;padding:9px 14px" onclick="copyCode()">コードをコピー</button>
+
+          <p class="small" style="margin:16px auto 0;max-width:580px;line-height:1.85">
+            このコードは、あなたの診断結果を相手とつなぐためのコードです。
+            LINEやSNSで相手に送り、相手が自分の診断を終えたあとに入力すると、
+            「友達・親友・片思い・恋人」など現在の関係に合わせた二人の相性分析を確認できます。
+          </p>
+
+          <button class="ghost" style="margin-top:18px;padding:11px 18px" onclick="copyCode()">
+            相性コードをコピー
+          </button>
         </div>
       </div>
 
@@ -323,18 +332,7 @@ button{cursor:pointer}
       </div>
       <div id="compatResult" class="compat-result hidden"></div>
     </div>
-
-    <div class="panel">
-      <div class="kicker">NEXT UPDATE</div>
-      <h2>次回追加予定</h2>
-      <p>・診断結果を使ったAI恋愛相談室<br>
-      ・LINE返信アドバイス<br>
-      ・今日の恋愛アクション<br>
-      ・相手タイプ別の接し方</p>
-      <div class="tip">Love Style Mapは、診断して終わりではなく、恋愛で迷ったときに戻ってこられるサービスへ育てていきます。</div>
-    </div>
-
-    <button class="ghost" style="width:100%;margin-top:18px" onclick="restartAll()">もう一度診断する</button>
+<button class="ghost" style="width:100%;margin-top:18px" onclick="restartAll()">もう一度診断する</button>
   </section>
 
   <section id="compatOnly" class="panel hidden">
@@ -667,7 +665,7 @@ function analyzeCompatibilityOnly(){
   showCompatibility(out,mine.vals,partner,selectedRelationOnly);
 }
 function copyCode(){
-  navigator.clipboard?.writeText(result.code).then(()=>alert("LSM CODEをコピーしました")).catch(()=>prompt("このコードをコピーしてください",result.code));
+  navigator.clipboard?.writeText(result.code).then(()=>alert("相性コードをコピーしました。相手に送って、二人の相性分析に使えます。")).catch(()=>prompt("このコードをコピーしてください",result.code));
 }
 function shareResult(){
   if(!result)return;
