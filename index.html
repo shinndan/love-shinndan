@@ -180,7 +180,7 @@ button{cursor:pointer}
 }
 
 /* =========================================================
-   LOVE STYLE MAP 3.1 — Premium visual system
+   LOVE STYLE MAP 3.2 — Premium visual system
    ========================================================= */
 :root{
   --theme:#d8b77a;
@@ -433,7 +433,7 @@ button:active{transform:scale(.975)!important}
 }
 
 
-/* LOVE STYLE MAP 3.1 — Result spacing refinement */
+/* LOVE STYLE MAP 3.2 — Result spacing refinement */
 .type-name{
   font-size:clamp(47px,10.8vw,76px);
 }
@@ -460,13 +460,70 @@ button:active{transform:scale(.975)!important}
   }
 }
 
+
+/* LOVE STYLE MAP 3.2 — Final polish */
+.gold-action{
+  background:linear-gradient(120deg,var(--theme),var(--theme-soft) 54%,var(--theme));
+  color:#15100a;
+  border-color:rgba(var(--theme-rgb),.55);
+  box-shadow:
+    0 14px 38px rgba(var(--theme-rgb),.18),
+    inset 0 1px 0 rgba(255,255,255,.52);
+}
+.restart-gold{
+  min-height:74px;
+  font-size:17px;
+}
+
+#startDiagnosisButton{
+  isolation:isolate;
+}
+#startDiagnosisButton::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  pointer-events:none;
+  opacity:0;
+  background:rgba(255,239,190,.72);
+  transform:translate(-50%,-50%) scale(.2);
+}
+#startDiagnosisButton.is-launching{
+  transform:scale(.982);
+  box-shadow:
+    0 0 0 1px rgba(var(--theme-rgb),.62),
+    0 0 46px rgba(var(--theme-rgb),.46),
+    inset 0 1px 0 rgba(255,255,255,.68);
+}
+#startDiagnosisButton.is-launching::before{
+  animation:startGoldWave .52s cubic-bezier(.18,.75,.22,1) forwards;
+}
+@keyframes startGoldWave{
+  0%{
+    opacity:.85;
+    transform:translate(-50%,-50%) scale(.2);
+    box-shadow:0 0 0 0 rgba(var(--theme-rgb),.42);
+  }
+  65%{
+    opacity:.28;
+  }
+  100%{
+    opacity:0;
+    transform:translate(-50%,-50%) scale(38);
+    box-shadow:0 0 38px 16px rgba(var(--theme-rgb),0);
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 3.1</span></span>
+    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 3.2</span></span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -563,7 +620,7 @@ button:active{transform:scale(.975)!important}
 
       <div class="actions">
         <button class="primary" onclick="saveResultImage()">画像を保存</button>
-        <button class="secondary" onclick="shareResult()">シェアする</button>
+        <button class="primary gold-action" onclick="shareResult()">シェアする</button>
       </div>
       <div class="notice">「画像を保存」では、収益化後の動きを再現するため短い広告デモが表示されます。</div>
 
@@ -620,7 +677,7 @@ button:active{transform:scale(.975)!important}
       </div>
       <div id="compatResult" class="compat-result hidden"></div>
     </div>
-<button class="ghost" style="width:100%;margin-top:18px" onclick="restartAll()">もう一度診断する</button>
+<button class="primary gold-action restart-gold" style="width:100%;margin-top:22px" onclick="restartAll()">もう一度診断する</button>
   </section>
 
   <section id="compatOnly" class="panel hidden">
@@ -743,7 +800,7 @@ function startQuiz(){
     document.getElementById("quizScreen").classList.remove("hidden");
     current=0;scores=[0,0,0,0];analysisPrecision=84;sessionQuestions=createQuestionSet();showQuestion();
     startButton?.classList.remove("is-launching");
-  },180);
+  },520);
 }
 function hideAll(){
   ["startScreen","quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>document.getElementById(id).classList.add("hidden"));
@@ -1852,7 +1909,7 @@ function restartAll(){
 
 <script>
 /* =========================================================
-   LOVE STYLE MAP 3.1 — Experience enhancements
+   LOVE STYLE MAP 3.2 — Experience enhancements
    ========================================================= */
 const typeThemes={
   "Moon Harbor":      {main:"#b6b4ff",soft:"#e7e3ff",rgb:"182,180,255",deep:"#55517e",group:"moon"},
@@ -2099,11 +2156,11 @@ showCompatibility=function(out,myVals,partner,relation){
 createResultImage=function(){
   if(!result)return;
   const theme=typeThemes[result.type.name]||typeThemes["Solar Bloom"];
-  const c=document.createElement("canvas");c.width=1080;c.height=1350;
+  const c=document.createElement("canvas");c.width=1080;c.height=1600;
   const x=c.getContext("2d");
   const bg=x.createLinearGradient(0,0,1080,1600);
   bg.addColorStop(0,"#08090d");bg.addColorStop(.52,"#15161c");bg.addColorStop(1,"#07080b");
-  x.fillStyle=bg;x.fillRect(0,0,1080,1350);
+  x.fillStyle=bg;x.fillRect(0,0,1080,1600);
   const glow=x.createRadialGradient(540,380,30,540,380,520);
   glow.addColorStop(0,theme.main+"40");glow.addColorStop(.5,theme.main+"12");glow.addColorStop(1,"transparent");
   x.fillStyle=glow;x.fillRect(0,0,1080,900);
@@ -2117,15 +2174,15 @@ createResultImage=function(){
   drawCanvasGlyph(x,theme.group,1.15);x.restore();
 
   x.fillStyle=theme.soft;x.font="700 84px sans-serif";x.fillText(result.type.name,540,518);
-  x.fillStyle="#eee8df";x.font="32px sans-serif";wrapText(x,result.type.sub,540,590,800,48);
+  x.fillStyle="#eee8df";x.font="32px sans-serif";wrapText(x,result.type.sub,540,580,820,48);
 
   const vals=[result.metrics.values[0],result.metrics.values[1],result.metrics.values[2],result.metrics.values[3],result.metrics.loyalty];
   const labs=["距離","表現","安心","自立","一途"];
-  drawCanvasRadar(x,540,945,236,vals,labs,theme);
+  drawCanvasRadar(x,540,1035,220,vals,labs,theme);
 
-  x.fillStyle="rgba(255,255,255,.48)";x.font="23px sans-serif";x.fillText("LSM CODE",540,1360);
-  x.fillStyle=theme.soft;x.font="700 43px monospace";x.fillText(result.code,540,1420);
-  x.fillStyle="rgba(255,255,255,.38)";x.font="21px sans-serif";x.fillText("恋愛を当てるのではなく、理解する。",540,1515);
+  x.fillStyle="rgba(255,255,255,.48)";x.font="23px sans-serif";x.fillText("LSM CODE",540,1392);
+  x.fillStyle=theme.soft;x.font="700 43px monospace";x.fillText(result.code,540,1452);
+  x.fillStyle="rgba(255,255,255,.38)";x.font="21px sans-serif";x.fillText("恋愛を当てるのではなく、理解する。",540,1530);
 
   const url=c.toDataURL("image/png");
   const a=document.createElement("a");a.href=url;a.download=`love-style-map-${result.type.name.replace(/\s/g,"-")}.png`;
@@ -2148,7 +2205,7 @@ function drawCanvasRadar(ctx,cx,cy,R,vals,labels,theme){
   for(let l=1;l<=4;l++){ctx.beginPath();for(let i=0;i<n;i++){const a=a0+i*2*Math.PI/n,r=R*l/4;const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;i?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.closePath();ctx.strokeStyle="rgba(255,255,255,.12)";ctx.lineWidth=2;ctx.stroke();}
   ctx.beginPath();vals.forEach((v,i)=>{const a=a0+i*2*Math.PI/n,r=R*v/100;const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;i?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.closePath();ctx.fillStyle=theme.main+"40";ctx.fill();ctx.strokeStyle=theme.main;ctx.lineWidth=5;ctx.stroke();
   ctx.font="24px sans-serif";ctx.fillStyle="rgba(255,255,255,.62)";ctx.textAlign="center";
-  labels.forEach((lab,i)=>{const a=a0+i*2*Math.PI/n,r=R+40;ctx.fillText(lab,cx+Math.cos(a)*r,cy+Math.sin(a)*r+7)});
+  labels.forEach((lab,i)=>{const a=a0+i*2*Math.PI/n,r=R+54;ctx.fillText(lab,cx+Math.cos(a)*r,cy+Math.sin(a)*r+7)});
 }
 </script>
 
@@ -2165,27 +2222,75 @@ function drawCanvasRadar(ctx,cx,cy,R,vals,labels,theme){
 <script>
 function playDiagnosisStartSound(){
   if(typeof soundEnabled!=="undefined" && !soundEnabled)return;
+
   try{
-    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
-    const now=audioCtx.currentTime;
-    const notes=[
-      {f:392,start:0,d:.13,v:.032},
-      {f:523.25,start:.075,d:.16,v:.036},
-      {f:659.25,start:.155,d:.28,v:.042}
-    ];
-    notes.forEach(note=>{
-      const osc=audioCtx.createOscillator();
-      const gain=audioCtx.createGain();
-      osc.type="sine";
-      osc.frequency.setValueAtTime(note.f,now+note.start);
-      gain.gain.setValueAtTime(.0001,now+note.start);
-      gain.gain.exponentialRampToValueAtTime(note.v,now+note.start+.018);
-      gain.gain.exponentialRampToValueAtTime(.0001,now+note.start+note.d);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(now+note.start);
-      osc.stop(now+note.start+note.d+.02);
-    });
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    if(!AudioContextClass)return;
+
+    audioCtx=audioCtx||new AudioContextClass();
+
+    const play=()=>{
+      const now=audioCtx.currentTime;
+
+      // 最初の「起動」感を出す短い打音
+      const impact=audioCtx.createOscillator();
+      const impactGain=audioCtx.createGain();
+      impact.type="triangle";
+      impact.frequency.setValueAtTime(180,now);
+      impact.frequency.exponentialRampToValueAtTime(360,now+.08);
+      impactGain.gain.setValueAtTime(.0001,now);
+      impactGain.gain.exponentialRampToValueAtTime(.055,now+.008);
+      impactGain.gain.exponentialRampToValueAtTime(.0001,now+.12);
+      impact.connect(impactGain);
+      impactGain.connect(audioCtx.destination);
+      impact.start(now);
+      impact.stop(now+.14);
+
+      // 523Hz → 659Hz → 880Hz の上昇音
+      const notes=[
+        {f:523.25,start:.055,d:.19,v:.042},
+        {f:659.25,start:.145,d:.23,v:.046},
+        {f:880.00,start:.255,d:.42,v:.052}
+      ];
+
+      notes.forEach((note,index)=>{
+        const osc=audioCtx.createOscillator();
+        const gain=audioCtx.createGain();
+        osc.type=index===2?"sine":"triangle";
+        osc.frequency.setValueAtTime(note.f,now+note.start);
+
+        gain.gain.setValueAtTime(.0001,now+note.start);
+        gain.gain.exponentialRampToValueAtTime(note.v,now+note.start+.018);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+note.start+note.d);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now+note.start);
+        osc.stop(now+note.start+note.d+.03);
+      });
+
+      // 最後に薄い高音の余韻を重ねる
+      const shimmer=audioCtx.createOscillator();
+      const shimmerGain=audioCtx.createGain();
+      shimmer.type="sine";
+      shimmer.frequency.setValueAtTime(1320,now+.31);
+      shimmer.frequency.exponentialRampToValueAtTime(1760,now+.60);
+      shimmerGain.gain.setValueAtTime(.0001,now+.31);
+      shimmerGain.gain.exponentialRampToValueAtTime(.018,now+.36);
+      shimmerGain.gain.exponentialRampToValueAtTime(.0001,now+.70);
+      shimmer.connect(shimmerGain);
+      shimmerGain.connect(audioCtx.destination);
+      shimmer.start(now+.31);
+      shimmer.stop(now+.72);
+
+      if(navigator.vibrate)navigator.vibrate(18);
+    };
+
+    if(audioCtx.state==="suspended"){
+      audioCtx.resume().then(play).catch(()=>{});
+    }else{
+      play();
+    }
   }catch(e){}
 }
 </script>
