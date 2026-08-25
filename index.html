@@ -183,7 +183,7 @@ button{cursor:pointer}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="badge">CORE DIAGNOSIS 2.1</span>
+    <span class="badge">CORE DIAGNOSIS 2.2</span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -306,10 +306,10 @@ button{cursor:pointer}
         </div>
 
         <div id="aiQuestionArea" class="hidden" style="margin-top:16px">
-          <p class="small">気になる項目を選ぶか、自由に質問してください。</p>
+          <p class="small">気になる項目を選ぶか、状況を具体的に入力してください。内容に合わせて診断結果を読み解きます。</p>
           <div class="relations" id="aiSuggestions"></div>
           <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px">
-            <input id="aiQuestionInput" class="compat-input" placeholder="例：恋人から見た私は？">
+            <input id="aiQuestionInput" class="compat-input" placeholder="例：返信が遅い相手とはどう接する？">
             <button class="secondary" onclick="askAIQuestion()">質問</button>
           </div>
           <div id="aiAnswer" class="compat-result hidden"></div>
@@ -1046,51 +1046,147 @@ function renderAISuggestions(){
   });
 }
 
+
+function getAIProfile(){
+  const m=result.metrics;
+  const v=m.values;
+  return {
+    approach:v[0], expression:v[1], stability:v[2], independence:v[3],
+    loyalty:m.loyalty, jealousy:m.jealousy, strategy:m.strategy,
+    warmth:m.warmth, romanceIQ:m.romanceIQ,
+    typeName:result.type.name, typeSub:result.type.sub
+  };
+}
+
+function levelText(value, high, mid, low){
+  if(value>=70)return high;
+  if(value>=45)return mid;
+  return low;
+}
+
+function detectAIIntent(question){
+  const q=question.replace(/\s+/g,"");
+  const intents=[
+    ["idealPartner",/向いて(いる|る)(人|相手)|相性がいい(人|相手)|どんな人が合う|理想の(人|相手|恋人)|合うタイプ/],
+    ["partnerView",/恋人から見た|相手から見た|どう見られ|どんな印象|周りから見た/],
+    ["lineStyle",/LINE|ライン|連絡|返信|既読|未読|メッセージ/],
+    ["marriage",/結婚|夫婦|家庭|旦那|妻|配偶者/],
+    ["breakup",/失恋|別れ|振られ|振った|未練|忘れられ/],
+    ["longTerm",/長続き|続くコツ|関係を続け|マンネリ/],
+    ["confession",/告白|気持ちを伝え|好きと言う/],
+    ["dating",/デート|会う頻度|初デート/],
+    ["jealousy",/嫉妬|束縛|不安|疑って/],
+    ["fight",/喧嘩|ケンカ|言い合い|仲直り|衝突/],
+    ["dependence",/依存|重い|執着|尽くしすぎ/],
+    ["cheating",/浮気|不倫|裏切/],
+    ["reconciliation",/復縁|やり直|元恋人|元カレ|元カノ/],
+    ["unrequited",/片思い|脈あり|好きな人|気になる人/],
+    ["weakness",/弱点|欠点|気をつけ|直した方が|損して/],
+    ["strength",/長所|強み|魅力|良いところ/],
+    ["loveLanguage",/愛情表現|愛し方|好きの伝え方/],
+    ["distance",/距離感|会う頻度|一人の時間|自由/],
+    ["future",/将来|何歳|いつ結婚|恋愛運|運命/],
+    ["selfUnderstanding",/本音|本当は|なぜ|理由|私ってどんな|恋愛傾向/]
+  ];
+  for(const [intent,pattern] of intents){
+    if(pattern.test(q))return intent;
+  }
+  return "general";
+}
+
+function buildAIResponse(intent, question){
+  const p=getAIProfile();
+
+  const approach=levelText(
+    p.approach,
+    "気持ちが動いたら、自分から関係を前へ進めやすい",
+    "相手の反応を確かめながら、無理のない速度で近づく",
+    "信頼ができるまで慎重に距離を測る"
+  );
+  const expression=levelText(
+    p.expression,
+    "好意や感謝を言葉や行動で分かりやすく伝える",
+    "大切な場面では気持ちを表すが、普段は行動で示すことも多い",
+    "気持ちがあっても、言葉にするまで時間がかかる"
+  );
+  const stability=levelText(
+    p.stability,
+    "安心できる関係や一貫した態度を特に重視する",
+    "安心と刺激の両方を、ほどよく求める",
+    "予定調和より新鮮さや変化に惹かれやすい"
+  );
+  const independence=levelText(
+    p.independence,
+    "恋愛中も自分の時間や価値観を守りやすい",
+    "相手との時間と自分の時間を状況に合わせて調整する",
+    "好きな相手を優先し、自分の希望を後回しにしやすい"
+  );
+
+  const caution = p.jealousy>=70
+    ? "相手の反応がいつもと違うと、事実が分かる前に悪い方向へ考えやすい点には注意が必要です。"
+    : p.independence<45
+      ? "相手を大切にするあまり、自分の予定や本音まで後回しにしないことが大切です。"
+      : p.expression<45
+        ? "気持ちを理解してほしいと願う一方で、言葉が少ないと相手には伝わりにくいことがあります。"
+        : "大きな弱点よりも、相手との違いを早めに言葉にできるかどうかが関係の安定を左右します。";
+
+  const advice = p.expression>=65
+    ? "気持ちはすでに伝える力があるので、伝える量より『相手が受け取りやすい言い方』を意識するとさらに良くなります。"
+    : "完璧な言葉を考えるより、『私はこう感じた』と短く伝える方が、誤解を減らせます。";
+
+  const responses={
+    idealPartner:{title:"向いている相手",body:`${userName}さんに合いやすいのは、${p.stability>=70?"態度や連絡に一貫性があり、安心を言葉と行動の両方で示せる人":"お互いの違いを楽しみながら、必要なときには真剣に話し合える人"}です。${userName}さんは、${approach}一方で、${stability}傾向があります。そのため、単に性格が似ている人よりも、曖昧な態度で不安を長引かせず、違いがあっても会話から逃げない人の方が相性は安定します。`,point:"見るべきポイントは「優しいか」だけではなく、約束・連絡・話し合いに一貫性があるかどうかです。"},
+    partnerView:{title:"恋人から見た印象",body:`恋人から見ると、${userName}さんは「${p.warmth>=70?"愛情が伝わりやすく、一緒にいると気持ちが温かくなる人":"落ち着きがあり、簡単には感情に流されない人"}」に映りやすいでしょう。${expression}タイプなので、${p.expression>=65?"好意は比較的伝わりやすい":"本当は大切に思っていても、相手には少し分かりにくい"}可能性があります。`,point:caution},
+    lineStyle:{title:"LINE・連絡の傾向",body:`${userName}さんは、${p.stability>=70?"返信の速さそのものより、連絡の安定感や言葉の温度を重視しやすい":"頻度より、会話が自然に続くかどうかを重視しやすい"}タイプです。${p.jealousy>=65?"返信が遅い状態が続くと、相手の気持ちまで変わったように感じやすい":"返信が遅くても、理由や普段の態度に一貫性があれば待ちやすい"}傾向があります。`,point:"最も合うのは、無理に即レスを続けることではなく、「忙しい日は遅くなる」など、お互いの連絡ペースを先に共有することです。"},
+    marriage:{title:"結婚後の傾向",body:`結婚すると、${userName}さんは${p.loyalty>=75?"約束や日常を大切にし、家庭に安定を作ろうとする":"互いの自由を残しながら、必要なときに支え合う"}パートナーになりやすいでしょう。${independence}ため、${p.independence<45?"家事や気遣いを一人で背負い込まない仕組み作り":"一人の時間と二人の時間を先に相談すること"}が特に重要です。`,point:"結婚相手には、感情だけでなく、お金・生活時間・家事・一人の時間について話せる人が向いています。"},
+    breakup:{title:"失恋したときの傾向",body:`${userName}さんは、別れそのもの以上に「なぜこうなったのか分からない状態」に心が残りやすいタイプです。${p.loyalty>=75?"一度大切にした相手への気持ちを簡単には切り替えにくい":"状況を整理できれば、比較的自分の生活へ戻りやすい"}でしょう。`,point:"回復を早めるには、相手の本心を推測し続けるより、「次の関係で譲れない条件」を3つ書き出す方法が合っています。"},
+    longTerm:{title:"長続きさせるコツ",body:`長続きの鍵は、${userName}さんが相手に合わせ続けることではなく、二人のルールを一緒に作ることです。${stability}ため、連絡頻度・一人の時間・ケンカ後の戻り方を早めに話せる関係ほど安心しやすいでしょう。`,point:advice},
+    confession:{title:"告白するときの傾向",body:`${userName}さんは、${approach}タイプです。告白では、長い説明よりも「一緒にいる時間が好き」「もっと近い関係になりたい」のように、気持ちと希望を分けて伝える方が自然です。`,point:"相手の気持ちは断定できません。相手が会話を続けようとするか、二人の時間を作ろうとするかを見ながら判断してください。"},
+    dating:{title:"デートで魅力が出る場面",body:`${userName}さんの魅力が出やすいのは、${p.warmth>=70?"相手の反応を見ながら会話を広げられる、落ち着いた場所":"一緒に新しい体験ができ、自然に会話が生まれる場所"}です。${p.stability>=70?"予定がある程度決まっている方が安心して楽しめる":"細かく決めすぎず、その場の流れを残す方が楽しみやすい"}でしょう。`,point:"デート後は、評価を求める長文より「今日は楽しかった。また○○したい」と具体的に伝えるのがおすすめです。"},
+    jealousy:{title:"嫉妬・不安の扱い方",body:`嫉妬しやすさは${p.jealousy}%で、${p.jealousy>=70?"大切な相手ほど小さな変化に敏感になりやすい":"強い束縛よりも、状況が分からないときだけ不安が出やすい"}傾向です。嫉妬は愛情の証明ではなく、「安心するための情報が不足している」というサインとして扱う方が合っています。`,point:"責める前に「今少し不安になっている。状況を教えてほしい」と、事実ではなく自分の感情から伝えるのが効果的です。"},
+    fight:{title:"ケンカ・仲直りの傾向",body:`ケンカでは、${p.expression>=65?"気持ちが強いまま言葉が増えやすい":"その場では黙り、あとから考え続けやすい"}可能性があります。${userName}さんには、結論を急ぐより、一度落ち着いてから「何が嫌だったか」「次はどうしたいか」を分けて話す方法が向いています。`,point:"勝ち負けではなく、次に同じことが起きたときのルールを決めると仲直りが長続きします。"},
+    dependence:{title:"恋愛への依存傾向",body:`自立性は${p.independence}%で、${p.independence<45?"好きな人を優先し、自分の生活が相手中心になりやすい":"恋愛中も自分の時間をある程度保ちやすい"}傾向です。依存かどうかは、好きの強さではなく、「相手の反応で一日の気分がほぼ決まるか」で見ると分かりやすいです。`,point:"相手以外の予定を週に一つ固定すると、愛情を減らさずに心の余裕を作れます。"},
+    cheating:{title:"浮気への向き合い方",body:`${userName}さんは${p.loyalty>=75?"一途さが強く、裏切りを関係全体の否定として受け取りやすい":"事実と今後の行動を分けて考えやすい"}傾向があります。ただし、診断だけで相手が浮気するかどうかは判断できません。`,point:"疑いがある場合は、スマホ確認より、具体的に気になった行動と自分の不安を分けて話してください。"},
+    reconciliation:{title:"復縁を考えるとき",body:`復縁が合うかどうかは、まだ好きかではなく、別れの原因が具体的に変えられるものかで判断する必要があります。${userName}さんは${p.loyalty>=75?"情が残ると良かった記憶を強く見やすい":"一度整理できれば現実的に判断しやすい"}タイプです。`,point:"「寂しいから」ではなく、「以前と何を変えるかを二人とも言えるか」を基準にしてください。"},
+    unrequited:{title:"片思い中の傾向",body:`片思いでは、${userName}さんは${p.approach>=65?"関係を進めるきっかけを作りやすい":"相手の反応を慎重に見すぎて、好意が伝わりにくい"}傾向があります。相手の本心は診断では分かりませんが、会話を続けようとする・相手から質問が返る・二人の予定を作ろうとする、という行動は参考になります。`,point:"一度に大きく動くより、二人で話す時間を少し増やす方が自然です。"},
+    weakness:{title:"恋愛で気をつけたい点",body:`${userName}さんが特に気をつけたいのは、${p.jealousy>=70?"相手の反応を事実以上に深読みすること":p.independence<45?"相手を優先しすぎて、自分の希望を後回しにすること":p.expression<45?"本音を察してもらおうとして、言葉が不足すること":"相手との違いを問題だと考えすぎること"}です。`,point:`${caution} 改善点があるというより、早めに気づけば調整できるクセとして捉えるのが適切です。`},
+    strength:{title:"恋愛での強み",body:`${userName}さんの強みは、${p.warmth>=75?"相手に『大切にされている』と感じさせる温かさ":p.loyalty>=75?"一度築いた関係を丁寧に守ろうとする誠実さ":p.independence>=70?"相手に依存せず、対等な関係を作れること":"相手の反応を見ながら関係を調整できること"}です。`,point:"その強みを活かすには、相手だけでなく自分にも同じ丁寧さを向けることが大切です。"},
+    loveLanguage:{title:"愛情表現の特徴",body:`${userName}さんは、${expression}タイプです。愛情表現は${p.expression>=70?"言葉や反応に出やすい":p.expression>=45?"行動と必要な言葉を組み合わせる":"行動には出ても、言葉では控えめになりやすい"}でしょう。`,point:"相手の受け取り方が違う場合は、「私は行動で示すことが多い」と伝えるだけでも誤解が減ります。"},
+    distance:{title:"心地よい距離感",body:`自立性は${p.independence}%で、${independence}タイプです。${p.independence>=65?"毎日長くつながるより、会う時間と一人の時間にメリハリがある関係":"連絡や会う頻度が安定している関係"}の方が心地よく感じやすいでしょう。`,point:"理想の頻度に正解はありません。負担になる前に、お互いの希望を数字で話すのがおすすめです。"},
+    future:{title:"将来について",body:`診断から結婚時期や未来を予言することはできません。ただ、${userName}さんは${p.stability>=70?"安心できる基盤が整うほど、長い関係を現実的に考えやすい":"関係に成長や新鮮さを感じられるほど、将来を考えやすい"}タイプです。`,point:"時期よりも、生活・お金・一人の時間について話せる相手かを重視すると、将来の満足度が上がります。"},
+    selfUnderstanding:{title:"恋愛傾向の理由",body:`${userName}さんの回答には、${approach}ことと、${stability}ことが同時に表れています。つまり、好きになる力はある一方で、関係が深まるほど安心できる根拠を求めるタイプです。`,point:advice},
+    general:{title:"診断結果から分かること",body:`質問「${question}」について診断結果から言えるのは、${userName}さんが${approach}一方で、${stability}傾向を持っていることです。ただし、現在の状況や相手の行動が分からないため、具体的な結論までは出せません。`,point:"「誰とのことか」「今どんな状況か」「何に迷っているか」を一文追加すると、より具体的な観点で整理できます。"}
+  };
+  return responses[intent]||responses.general;
+}
+
 function askAIQuestion(){
   const input=document.getElementById("aiQuestionInput");
   const q=(input.value||"").trim();
   if(!q)return;
+
   const out=document.getElementById("aiAnswer");
   out.classList.remove("hidden");
-  out.innerHTML=`<p>${userName}さんの診断結果を確認しています…</p>`;
+  out.innerHTML=`<p>${userName}さんの診断結果と質問内容を照合しています…</p>`;
 
   setTimeout(()=>{
-    let answer="";
-    if(/向いて|相手/.test(q)){
-      answer=`${userName}さんには、${result.metrics.values[3]>=70?"自由を尊重しながら必要なときには言葉で戻ってきてくれる人":"気持ちを曖昧にせず、安心を行動でも示してくれる人"}が向いています。同じ性格かどうかより、話し合いを避けない相手かどうかが大切です。`;
-    }else if(/恋人から|どう見/.test(q)){
-      answer=`恋人から見ると、${userName}さんは${result.metrics.warmth>=70?"愛情が分かりやすく、そばにいると安心できる人":"落ち着いていて、自分の時間も大切にできる人"}に映りやすいでしょう。ただ、我慢していることまで平気に見せると、本音が伝わりにくくなる場合があります。`;
-    }else if(/LINE|連絡/.test(q)){
-      answer=`${userName}さんは、返信速度よりも言葉の温度を気にしやすいタイプです。短い返事でも気持ちが伝われば安心できますが、雑な反応が続くと距離を取りやすくなります。`;
-    }else if(/結婚/.test(q)){
-      answer=`結婚後は、${result.metrics.loyalty>=75?"家庭や約束を大切にする安定したパートナー":"互いの自由を守りながら支え合うパートナー"}になりやすいでしょう。役割を一人で背負い込まず、早めに相談できる関係が向いています。`;
-    }else if(/失恋|別れ/.test(q)){
-      answer=`${userName}さんは、別れそのものより「なぜこうなったのか分からない状態」に長く苦しみやすい傾向があります。答えの出ない推測を続けるより、自分が次に大切にしたい条件を書き出すと回復が早まります。`;
-    }else if(/長続き|続く/.test(q)){
-      answer=`長続きの鍵は、相手に合わせることではなく、二人のルールを一緒に作ることです。連絡頻度、ひとりの時間、ケンカ後の戻り方を早めに話せると、${userName}さんの良さが最も活きます。`;
-    }else{
-      answer=`${userName}さんの診断結果では、一途さが${result.metrics.loyalty}%、自立性が${result.metrics.values[3]}%でした。このバランスを見ると、相手を大切にしながらも、自分の気持ちを我慢しすぎないことが重要です。質問の状況をもう少し具体的にすると、さらに絞って考えられます。`;
-    }
-
-    const extra = result.metrics.jealousy>=65
-      ? "もう一つ気になるのは、相手の反応を深読みしやすい点です。"
-      : "もう一つ気になるのは、平気なふりをして本音を後回しにしやすい点です。";
+    const intent=detectAIIntent(q);
+    const response=buildAIResponse(intent,q);
 
     out.innerHTML=`
       <div class="kicker">AI RESPONSE</div>
-      <h2 style="margin:8px 0 12px">${q}</h2>
-      <p>${answer}</p>
-      <div class="tip">${extra}<br><button class="ghost" style="margin-top:10px" onclick="askMoreInsight()">詳しく見る</button></div>
+      <h2 style="margin:8px 0 12px">${response.title}</h2>
+      <p>${response.body}</p>
+      <div class="tip" style="margin-top:16px">
+        <strong>今回のポイント</strong><br>
+        ${response.point}
+      </div>
+      <p class="small" style="margin-top:14px">
+        この回答は診断結果をもとにした自己理解用の分析です。
+        相手の本心や未来を断定するものではありません。
+      </p>
     `;
-  },800);
-}
-
-function askMoreInsight(){
-  const out=document.getElementById("aiAnswer");
-  const text = result.metrics.jealousy>=65
-    ? `${userName}さんは、相手を信じたい気持ちが強いからこそ、小さな変化にも敏感になります。不安を感じたときは、結論を出す前に「今少し不安になっている」と感情だけを共有するのがおすすめです。`
-    : `${userName}さんは、自分で整理できる力があるぶん、助けてほしい瞬間まで一人で抱えやすい傾向があります。弱さを見せることは依存ではなく、信頼を深める行動です。`;
-  out.innerHTML += `<div class="section"><h2>さらに詳しく</h2><p>${text}</p></div>`;
+  },700);
 }
 
 function restartAll(){
