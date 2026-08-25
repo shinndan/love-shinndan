@@ -149,6 +149,26 @@ button{cursor:pointer}
 }
 .notice{padding:12px 14px;border-radius:12px;background:#18181e;color:var(--muted);font-size:13px;margin-top:14px}
 .footer{text-align:center;color:#77717a;font-size:12px;padding-top:35px}
+
+.precision-card{
+  margin-top:18px;
+  padding:26px 22px;
+  border:1px solid rgba(216,183,122,.48);
+  border-radius:24px;
+  background:linear-gradient(145deg,rgba(216,183,122,.11),rgba(25,25,31,.96) 58%);
+  box-shadow:0 18px 46px rgba(0,0,0,.22);
+  text-align:center;
+}
+.precision-card .precision-title{font-size:18px;font-weight:800;color:#f2eadf;margin:4px 0 0}
+.precision-number{font-size:clamp(58px,16vw,88px);line-height:1;font-weight:850;letter-spacing:-.04em;color:var(--accent2);margin:14px 0 16px}
+.precision-caption{color:#d4cec6;font-size:15px;line-height:1.8;margin:14px auto 0;max-width:500px}
+.precision-next{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);text-align:left}
+.precision-next strong{display:block;color:#fff;font-size:18px;margin-bottom:6px}
+.ai-benefits{display:grid;gap:10px;margin:18px 0;text-align:left}
+.ai-benefit{display:flex;gap:10px;align-items:flex-start;padding:12px 13px;background:#15151a;border:1px solid var(--line);border-radius:13px;color:#ddd7cf}
+.ai-benefit span:first-child{color:var(--accent2);font-weight:900}
+.ai-question-preview{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.ai-question-preview span{padding:8px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;background:#15151a}
 @media(max-width:480px){
   .hero-copy{font-size:clamp(29px,7.7vw,39px)!important;gap:4px}
   .hero{padding-left:4px;padding-right:4px}
@@ -228,10 +248,17 @@ button{cursor:pointer}
       </div>
 
       <div id="stats" class="stats"></div>
-      <div class="code-box" style="margin-top:16px">
-        <div class="small">現在の分析精度</div>
-        <div id="precisionValue" class="code">84%</div>
-        <div class="bar" style="margin-top:10px"><span id="precisionBar" style="width:84%"></span></div>
+      <div class="precision-card">
+        <div class="kicker">ANALYSIS PRECISION</div>
+        <div id="precisionHeading" class="precision-title">あなたへの分析精度</div>
+        <div id="precisionValue" class="precision-number">84%</div>
+        <div class="bar"><span id="precisionBar" style="width:84%"></span></div>
+        <p class="precision-caption">16問の回答から読み取れた情報量をもとにした、この診断内での分析精度の目安です。</p>
+        <div class="precision-next">
+          <strong>もっと深く知りたいですか？</strong>
+          <p class="small" style="margin:0">AI分析と3つの追加質問で、回答の背景や無意識の恋愛傾向まで読み解き、最大96%まで高められます。</p>
+          <button class="primary" style="width:100%;margin-top:15px" onclick="startAIWithAd()">AI分析で精度を高める</button>
+        </div>
       </div>
 
       <div class="actions">
@@ -246,8 +273,17 @@ button{cursor:pointer}
         <div class="kicker">AI ANALYSIS</div>
         <h2 id="aiHeading">AI分析レポート</h2>
         <p>診断では見えなかった「なぜそうなるのか」まで、回答内容と恋愛ステータスから読み解きます。</p>
+        <div class="ai-benefits">
+          <div class="ai-benefit"><span>✓</span><span>無意識に繰り返しやすい恋愛のクセ</span></div>
+          <div class="ai-benefit"><span>✓</span><span>相性の良い相手と、関係を長続きさせる鍵</span></div>
+          <div class="ai-benefit"><span>✓</span><span>弱点を責めずに改善するための具体的なヒント</span></div>
+        </div>
+        <p class="small" style="margin-bottom:6px">分析後は、気になることをAIに質問できます。</p>
+        <div class="ai-question-preview">
+          <span>恋人から見た私は？</span><span>LINEの特徴は？</span><span>長続きするコツは？</span>
+        </div>
         <button id="aiButton" class="primary" style="width:100%;margin-top:18px"
-          onclick="startAIWithAd()">広告を見て、恋愛マップを深く読み解く</button>
+          onclick="startAIWithAd()">恋愛マップをさらに深く読み解く</button>
 
         <div id="aiAnalysis" class="compat-result hidden"></div>
 
@@ -516,6 +552,7 @@ function showResult(){
 
   const labels=["距離を縮める力","愛情表現","安心を求める度","自立性","恋愛偏差値","一途度","嫉妬しやすさ","駆け引き度","恋愛体温"];
   const allValues=[...values,romanceIQ,loyalty,jealousy,strategy,warmth];
+  document.getElementById("precisionHeading").textContent=`${userName}さんへの分析精度`;
   document.getElementById("precisionValue").textContent=analysisPrecision+"%";
   document.getElementById("precisionBar").style.width=analysisPrecision+"%";
   document.getElementById("stats").innerHTML=labels.map((l,i)=>`
@@ -528,7 +565,7 @@ function showResult(){
   document.getElementById("aiAnalysis").classList.add("hidden");
   document.getElementById("aiAnalysis").innerHTML="";
   document.getElementById("aiButton").disabled=false;
-  document.getElementById("aiButton").textContent="広告を見て、恋愛マップを深く読み解く";
+  document.getElementById("aiButton").textContent="恋愛マップをさらに深く読み解く";
 
   renderRelations("relations",false);
   window.scrollTo({top:0,behavior:"smooth"});
@@ -856,7 +893,10 @@ function generateAIAnalysis(){
 
       <div class="tip">この分析は診断回答をもとにしたβ版です。相手の気持ちや未来を断定するものではありません。</div>
     `;
-    btn.textContent="AI分析をもう一度作る";
+    analysisPrecision=Math.max(analysisPrecision,90);
+    document.getElementById("precisionValue").textContent=analysisPrecision+"%";
+    document.getElementById("precisionBar").style.width=analysisPrecision+"%";
+    btn.textContent="AI分析をもう一度見る";
     btn.disabled=false;
     renderAISuggestions();
     document.getElementById("precisionArea").classList.remove("hidden");
@@ -910,8 +950,8 @@ function answerPrecision(value){
     document.getElementById("precisionBar").style.width="96%";
     document.getElementById("precisionQuestions").innerHTML=`
       <div class="tip">
-        <strong>分析精度が96%になりました。</strong><br>
-        追加回答を反映すると、${userName}さんは「相手を大切にする力」と「自分の本音を伝える力」のバランスが、恋愛を長続きさせる重要な鍵になっています。
+        <strong>${userName}さんへの分析精度が96%になりました。</strong><br>
+        追加回答を反映すると、「相手を大切にする力」と「自分の本音を伝える力」のバランスが、恋愛を長続きさせる重要な鍵だと分かりました。
       </div>`;
   }
 }
