@@ -1,49 +1,83 @@
 <!DOCTYPE html>
-
 <html lang="ja">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>恋愛タイプ診断｜あなたは追う派？追われる派？</title>
-
-<meta name="description" content="10問であなたの恋愛タイプを診断。あなたは追う恋愛？追われる恋愛？">
-
+<title>恋愛タイプ診断</title>
 <style>
-
-* {
-
-  box-sizing: border-box;
-
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#fff1f5;
+  color:#333;
 }
-
-body {
-
-  margin: 0;
-
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-
-  background: linear-gradient(135deg, #fff1f5, #f7eaff);
-
-  color: #333;
-
+main{
+  width:90%;
+  max-width:500px;
+  margin:40px auto;
 }
-
-.container {
-
-  width: 92%;
-
-  max-width: 520px;
-
-  margin: 0 auto;
-
-  padding: 35px 0 60px;
-
+.box{
+  background:#fff;
+  padding:24px;
+  border-radius:20px;
+  box-shadow:0 8px 25px rgba(0,0,0,.1);
 }
+h1{
+  text-align:center;
+}
+button{
+  width:100%;
+  padding:15px;
+  margin-top:12px;
+  border:0;
+  border-radius:12px;
+  background:#e85d8f;
+  color:#fff;
+  font-size:17px;
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="box">
+    <h1>恋愛タイプ診断</h1>
+    <p>3問に答えて、あなたの恋愛タイプを診断します。</p>
 
-.header {
+    <div id="quiz">
+      <p id="question">好きな人ができたら？</p>
+      <button onclick="answer(1)">自分からアピールする</button>
+      <button onclick="answer(0)">相手から来るのを待つ</button>
+    </div>
 
-  text-align
+    <div id="result" style="display:none">
+      <h2 id="resultText"></h2>
+      <button onclick="location.reload()">もう一度診断する</button>
+    </div>
+  </div>
+</main>
+
+<script>
+let score=0;
+let count=0;
+
+function answer(point){
+  score+=point;
+  count++;
+
+  const questions=[
+    "連絡が来ないときは？",
+    "告白するなら？"
+  ];
+
+  if(count<3){
+    document.getElementById("question").textContent=questions[count-1];
+  }else{
+    document.getElementById("quiz").style.display="none";
+    document.getElementById("result").style.display="block";
+    document.getElementById("resultText").textContent=
+      score>=2 ? "あなたは追う恋愛タイプ！" : "あなたは追われる恋愛タイプ！";
+  }
+}
+</script>
+</body>
+</html>
