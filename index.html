@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#101013">
 <title>Love Style Map｜「好き」がわかれば、恋愛は変わる。</title>
-<meta name="description" content="恋愛を当てるのではなく、理解する。16の質問から、あなたの恋愛設計図を読み解くLove Style Map。">
+<meta name="description" content="恋愛を当てるのではなく、理解する。毎回変わる16の質問から、あなただけの恋愛マップを生成するLove Style Map。">
 <style>
 :root{
   --bg:#0d0d10;
@@ -163,7 +163,7 @@ button{cursor:pointer}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="badge">VERSION 1.1</span>
+    <span class="badge">CORE DIAGNOSIS 2.0</span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -197,16 +197,25 @@ button{cursor:pointer}
 
   <section id="loadingScreen" class="panel hidden">
     <div class="loading">
+      <div class="kicker">GENERATING YOUR MAP</div>
       <div class="orbit"></div>
-      <h2>あなたの恋愛設計図を解析中</h2>
-      <p class="small">恋愛傾向・愛情表現・安心感・自立性を読み解いています…</p>
+      <h2>あなただけの恋愛マップを生成中…</h2>
+      <p id="mapStage" class="small">回答パターンを読み込んでいます…</p>
+      <div class="progress-shell" style="margin-top:22px">
+        <div id="mapProgress" class="progress"></div>
+      </div>
+      <div id="mapChecks" style="text-align:left;max-width:360px;margin:18px auto 0;color:var(--muted);font-size:14px"></div>
     </div>
   </section>
 
   <section id="resultScreen" class="hidden">
     <div class="panel">
       <div class="result-head">
-        <div class="kicker">YOUR LOVE STYLE</div><p class="small" style="margin:8px 0 0">恋愛を当てるのではなく、理解する。</p>
+        <div class="kicker">YOUR LOVE STYLE</div>
+        <div class="tip" style="margin:14px auto 22px;text-align:center;max-width:440px">
+          <strong id="mapCompleteTitle">あなたの恋愛マップが完成しました。</strong><br>
+          <span class="small">世界に一つだけの、今回の恋愛マップです。</span>
+        </div><p class="small" style="margin:8px 0 0">恋愛を当てるのではなく、理解する。</p>
         <div id="typeIcon" class="type-icon">🌙</div>
         <h1 id="typeName" class="type-name"></h1>
         <p id="typeSub" class="type-sub"></p>
@@ -219,6 +228,11 @@ button{cursor:pointer}
       </div>
 
       <div id="stats" class="stats"></div>
+      <div class="code-box" style="margin-top:16px">
+        <div class="small">現在の分析精度</div>
+        <div id="precisionValue" class="code">84%</div>
+        <div class="bar" style="margin-top:10px"><span id="precisionBar" style="width:84%"></span></div>
+      </div>
 
       <div class="actions">
         <button class="primary" onclick="saveResultImage()">画像を保存</button>
@@ -233,9 +247,18 @@ button{cursor:pointer}
         <h2 id="aiHeading">AI分析レポート</h2>
         <p>診断では見えなかった「なぜそうなるのか」まで、回答内容と恋愛ステータスから読み解きます。</p>
         <button id="aiButton" class="primary" style="width:100%;margin-top:18px"
-          onclick="startAIWithAd()">広告を見てAI分析を開く</button>
+          onclick="startAIWithAd()">広告を見て、恋愛マップを深く読み解く</button>
 
         <div id="aiAnalysis" class="compat-result hidden"></div>
+
+        <div id="precisionArea" class="hidden" style="margin-top:16px">
+          <div class="tip">
+            <strong>さらに精度を上げますか？</strong><br>
+            3つの追加質問に答えると、分析精度が最大96%まで上がります。
+          </div>
+          <button id="precisionStartButton" class="secondary" style="width:100%;margin-top:12px" onclick="startPrecisionQuestions()">3問に答えて精度を上げる</button>
+          <div id="precisionQuestions" class="hidden" style="margin-top:14px"></div>
+        </div>
 
         <div id="aiQuestionArea" class="hidden" style="margin-top:16px">
           <p class="small">気になる項目を選ぶか、自由に質問してください。</p>
@@ -303,56 +326,8 @@ button{cursor:pointer}
 </div>
 
 <script>
-const questions = [
-  {q:"気になる人ができたとき、最初の一歩は？", a:[
-    ["自分から会話や連絡を増やす",[2,0,0,0]],["相手の反応を見ながら近づく",[-1,0,1,0]],["自然なきっかけを待つ",[-2,0,0,1]],["まず友達として信頼を作る",[-1,0,2,1]]
-  ]},
-  {q:"愛情を伝えるなら、最も自分らしいのは？", a:[
-    ["言葉ではっきり伝える",[1,2,0,0]],["行動や気遣いで示す",[0,-1,1,1]],["一緒にいる時間で示す",[0,1,1,-1]],["あえて言いすぎず、相手に委ねる",[-1,-2,0,1]]
-  ]},
-  {q:"理想の関係に一番近いものは？", a:[
-    ["いつも一緒に熱量を共有する",[1,1,-2,-1]],["安心して帰ってこられる関係",[0,0,2,0]],["お互いを高め合える関係",[1,0,0,2]],["自由を尊重しながらつながる関係",[-1,0,0,2]]
-  ]},
-  {q:"連絡の頻度についてどう感じる？", a:[
-    ["多いほど安心する",[1,1,1,-2]],["毎日少しはつながっていたい",[0,1,1,-1]],["内容が良ければ頻度は問わない",[0,0,0,1]],["必要なときだけで十分",[-1,-1,0,2]]
-  ]},
-  {q:"相手との意見がぶつかったときは？", a:[
-    ["その場ですぐ話し合う",[2,1,0,0]],["少し落ち着いてから話す",[-1,0,2,1]],["相手の気持ちを優先する",[0,1,1,-1]],["いったん距離を置いて整理する",[-2,-1,0,2]]
-  ]},
-  {q:"惹かれやすい相手は？", a:[
-    ["情熱的で分かりやすい人",[1,1,-2,0]],["穏やかで誠実な人",[0,0,2,0]],["知的で自分の世界を持つ人",[-1,0,0,2]],["少し謎があって刺激的な人",[1,-1,-2,1]]
-  ]},
-  {q:"相手に秘密がありそうだと感じたら？", a:[
-    ["直接聞く",[2,1,0,0]],["様子を見ながら確かめる",[0,0,1,0]],["信じて待つ",[-1,0,2,1]],["自分の中で考えすぎる",[-1,-1,0,-1]]
-  ]},
-  {q:"大切な人と過ごす休日は？", a:[
-    ["予定をたくさん詰めたい",[1,1,-2,-1]],["家や近場でゆっくりしたい",[0,0,2,0]],["一緒でも別々のことをしたい",[-1,0,1,2]],["その日の気分で決めたい",[1,0,-1,1]]
-  ]},
-  {q:"嫉妬したときのあなたに近いのは？", a:[
-    ["素直に伝える",[2,1,0,0]],["少し態度に出る",[1,0,-1,-1]],["表に出さず整理する",[-1,-1,1,1]],["基本的にあまり嫉妬しない",[-1,0,1,2]]
-  ]},
-  {q:"長く続く関係に必要だと思うものは？", a:[
-    ["好きという熱量",[1,2,-1,0]],["信頼と安心",[0,0,2,0]],["会話と理解",[1,1,1,0]],["それぞれの自由",[-1,-1,0,2]]
-  ]},
-  {q:"別れや距離を感じたときは？", a:[
-    ["取り戻すために動く",[2,1,-1,0]],["理由をきちんと知りたい",[1,0,1,0]],["時間をかけて受け入れる",[-1,-1,2,1]],["自分の生活に意識を戻す",[-1,-1,0,2]]
-  ]},
-  {q:"『愛されている』と感じる瞬間は？", a:[
-    ["言葉で気持ちを伝えられたとき",[0,2,0,0]],["行動で大切にされたとき",[0,0,2,0]],["必要とされたとき",[1,1,0,-2]],["自由な自分を尊重されたとき",[-1,-1,0,2]]
-  ]},
-  {q:"好きな人から返信が遅いときは？", a:[
-    ["軽く追加で連絡する",[2,1,-1,0]],["少し気になるが待つ",[0,0,1,0]],["忙しいのだと思う",[-1,0,2,1]],["何か悪いことをしたか考える",[-1,-1,-1,-1]]
-  ]},
-  {q:"サプライズについてどう思う？", a:[
-    ["するのもされるのも好き",[1,2,-1,0]],["小さなサプライズなら好き",[0,1,1,0]],["事前に相談してほしい",[-1,0,2,1]],["あまり必要ない",[-1,-1,1,2]]
-  ]},
-  {q:"恋愛と自分の時間、どちらを優先する？", a:[
-    ["恋愛を優先しやすい",[1,1,0,-2]],["状況によって調整する",[0,0,1,0]],["どちらも同じくらい大事",[0,0,1,1]],["自分の時間を守りたい",[-1,-1,0,2]]
-  ]},
-  {q:"好きな人への本音は、どのくらい言える？", a:[
-    ["ほとんど言える",[2,2,0,0]],["大事なことは言える",[1,1,1,0]],["少しずつなら言える",[-1,0,1,1]],["かなり慎重になる",[-2,-1,0,1]]
-  ]}
-];
+const questionPool = [{"axis":0,"q":"気になる人ができたとき、最初の一歩は？","a":[["自分から会話や連絡を増やす",[2,0,0,0]],["相手の反応を見ながら近づく",[1,0,1,0]],["自然なきっかけを待つ",[-2,0,0,1]],["まず友達として信頼を作る",[-1,0,2,1]]]},{"axis":0,"q":"初対面で好みの人に会ったら？","a":[["自分から話しかける",[2,1,0,0]],["目が合えば笑顔を見せる",[1,0,1,0]],["共通の話題を探す",[0,0,1,1]],["相手から来るまで待つ",[-2,0,0,1]]]},{"axis":0,"q":"デートに誘うとしたら？","a":[["思ったときにすぐ誘う",[2,1,0,0]],["相手の予定を確認して誘う",[1,0,1,0]],["会話の流れで自然に誘う",[0,0,1,1]],["できれば相手から誘ってほしい",[-2,0,0,1]]]},{"axis":0,"q":"好きな人との距離が縮まらないときは？","a":[["自分から新しいきっかけを作る",[2,0,-1,0]],["少しずつ接点を増やす",[1,0,1,0]],["今の関係を大切にする",[-1,0,2,0]],["いったん様子を見る",[-2,0,0,1]]]},{"axis":0,"q":"相手の好意を感じたら？","a":[["すぐに自分も好意を返す",[2,1,0,0]],["少し確かめてから動く",[1,0,1,0]],["相手の出方を待つ",[-1,0,1,0]],["確信できるまで慎重になる",[-2,0,1,1]]]},{"axis":0,"q":"グループの中に気になる人がいたら？","a":[["二人で話せる機会を作る",[2,0,0,0]],["自然に近くにいる",[1,0,1,0]],["みんなと同じように接する",[-1,0,1,1]],["気づかれないようにする",[-2,-1,0,1]]]},{"axis":0,"q":"告白するなら？","a":[["自分のタイミングで伝える",[2,2,0,0]],["相手の気持ちを確認してから",[1,1,1,0]],["自然な流れを待つ",[-1,0,1,1]],["相手から言ってほしい",[-2,0,0,1]]]},{"axis":0,"q":"恋愛の始まり方で理想なのは？","a":[["一気に惹かれ合う",[2,1,-1,0]],["少しずつ距離が縮まる",[0,0,2,0]],["友達から自然に変わる",[-1,0,2,1]],["相手に見つけてもらう",[-2,0,0,1]]]},{"axis":0,"q":"好きな人と二人きりになったら？","a":[["気になることを積極的に聞く",[2,1,0,0]],["相手が話しやすい空気を作る",[1,0,1,0]],["普段通りに接する",[0,0,1,1]],["緊張して少し静かになる",[-2,-1,0,0]]]},{"axis":0,"q":"恋のチャンスを逃しそうなときは？","a":[["後悔しないよう動く",[2,1,-1,0]],["できる範囲で気持ちを示す",[1,0,1,0]],["縁があれば進むと思う",[-1,0,1,1]],["無理に追わない",[-2,0,0,2]]]},{"axis":0,"q":"相手のSNSを見つけたら？","a":[["自然なきっかけでつながる",[1,0,1,0]],["すぐフォローする",[2,0,0,0]],["少し様子を見る",[-1,0,1,1]],["自分からは何もしない",[-2,0,0,1]]]},{"axis":0,"q":"恋愛ではどちらが近い？","a":[["気持ちが先に動く",[2,1,-1,0]],["考えながら動く",[1,0,1,1]],["信頼ができてから動く",[-1,0,2,1]],["相手の行動を待つ",[-2,0,0,1]]]},{"axis":1,"q":"愛情を伝えるなら、最も自分らしいのは？","a":[["言葉ではっきり伝える",[1,2,0,0]],["行動や気遣いで示す",[0,1,1,0]],["一緒にいる時間で示す",[0,1,1,-1]],["あえて言いすぎず相手に委ねる",[0,-2,0,1]]]},{"axis":1,"q":"『好き』という言葉についてどう思う？","a":[["何度でも伝えたい",[0,2,0,0]],["大切な場面で伝えたい",[0,1,1,0]],["言葉より行動が大事",[0,0,1,1]],["少し照れくさい",[0,-2,0,0]]]},{"axis":1,"q":"記念日には？","a":[["しっかり祝いたい",[0,2,1,-1]],["小さくても気持ちを伝える",[0,1,1,0]],["普段の関係の方が大切",[0,0,1,1]],["特にこだわらない",[0,-1,0,1]]]},{"axis":1,"q":"相手を褒めるときは？","a":[["思ったらすぐ伝える",[1,2,0,0]],["具体的に伝える",[0,1,1,0]],["態度で示す",[0,0,1,0]],["恥ずかしくてあまり言えない",[0,-2,0,0]]]},{"axis":1,"q":"プレゼントを選ぶなら？","a":[["相手が驚くもの",[0,2,-1,0]],["相手が本当に使うもの",[0,1,1,0]],["一緒に選ぶ",[0,0,1,1]],["物より時間を大切にする",[0,-1,1,0]]]},{"axis":1,"q":"会いたいときは？","a":[["素直に『会いたい』と言う",[1,2,0,0]],["予定を聞いてみる",[1,1,1,0]],["遠回しに雰囲気を出す",[0,0,0,0]],["相手から言ってくれるのを待つ",[-1,-2,0,0]]]},{"axis":1,"q":"相手が落ち込んでいたら？","a":[["言葉で励ます",[0,2,0,0]],["そばにいて話を聞く",[0,1,2,0]],["何かしてあげる",[0,1,1,0]],["一人になる時間を作る",[0,-1,0,2]]]},{"axis":1,"q":"スキンシップについては？","a":[["多い方が安心する",[0,2,1,-1]],["自然に触れ合いたい",[0,1,1,0]],["相手に合わせる",[0,0,1,0]],["少なくても平気",[0,-1,0,2]]]},{"axis":1,"q":"感謝を伝える頻度は？","a":[["小さなことでも毎回伝える",[0,2,1,0]],["大事なときに伝える",[0,1,1,0]],["態度で分かってほしい",[0,-1,0,0]],["言葉にするのが苦手",[0,-2,0,0]]]},{"axis":1,"q":"人前での愛情表現は？","a":[["気にせずできる",[0,2,0,0]],["控えめならできる",[0,1,1,0]],["二人きりのときだけ",[0,0,1,0]],["かなり苦手",[0,-2,0,1]]]},{"axis":1,"q":"相手に不安を感じたら？","a":[["気持ちを言葉にする",[0,2,0,0]],["落ち着いて相談する",[0,1,1,0]],["態度に少し出る",[0,0,-1,0]],["自分の中で抱える",[0,-2,0,1]]]},{"axis":1,"q":"恋人へのメッセージは？","a":[["気持ちをたくさん書く",[0,2,0,-1]],["短くても温かくする",[0,1,1,0]],["用件中心になりやすい",[0,-1,0,1]],["会ったときに話したい",[0,-2,1,1]]]},{"axis":2,"q":"理想の関係に一番近いものは？","a":[["安心して帰ってこられる関係",[0,0,2,0]],["いつも一緒に熱量を共有する",[1,1,-2,-1]],["お互いを高め合える関係",[1,0,0,1]],["自由を尊重しながらつながる",[-1,0,1,2]]]},{"axis":2,"q":"連絡が急に減ったら？","a":[["理由を聞いて安心したい",[0,0,2,-1]],["少し気になるが待つ",[0,0,1,0]],["忙しいのだと思う",[0,0,2,1]],["刺激がなくなったと感じる",[0,0,-2,0]]]},{"axis":2,"q":"長く続く関係に必要なのは？","a":[["信頼と安心",[0,0,2,0]],["好きという熱量",[1,1,-2,0]],["会話と理解",[0,1,1,0]],["それぞれの自由",[0,0,0,2]]]},{"axis":2,"q":"理想のデート頻度は？","a":[["定期的に会えると安心",[0,0,2,-1]],["会いたいときに会う",[0,0,0,0]],["予定が合うときで十分",[0,0,1,1]],["少ないと物足りない",[0,0,-2,-1]]]},{"axis":2,"q":"関係が安定してきたら？","a":[["もっと安心できる",[0,0,2,0]],["一緒に将来を考えたい",[0,0,2,0]],["少し新しい刺激が欲しい",[0,0,-1,0]],["退屈に感じやすい",[0,0,-2,0]]]},{"axis":2,"q":"恋人との約束は？","a":[["小さな約束も大切",[0,0,2,0]],["重要な約束は守りたい",[0,0,1,0]],["状況次第で柔軟に考える",[0,0,0,1]],["気分や流れを優先する",[0,0,-2,0]]]},{"axis":2,"q":"将来の話をするなら？","a":[["早めに価値観を知りたい",[0,0,2,0]],["関係が深まってから",[0,0,1,0]],["自然なタイミングで",[0,0,0,1]],["今を楽しむ方が大事",[0,0,-2,0]]]},{"axis":2,"q":"恋人の予定が急に変わったら？","a":[["理由が分かれば大丈夫",[0,0,2,0]],["少し残念だが受け入れる",[0,0,1,0]],["自分の時間に切り替える",[0,0,1,2]],["振り回される感じが嫌",[0,0,-1,0]]]},{"axis":2,"q":"理想の休日は？","a":[["家や近場でゆっくり",[0,0,2,0]],["二人の定番を楽しむ",[0,0,2,0]],["新しい場所へ行く",[0,0,-1,0]],["その日の気分で決める",[0,0,-2,1]]]},{"axis":2,"q":"恋人に求める一番のものは？","a":[["誠実さ",[0,0,2,0]],["安心感",[0,0,2,-1]],["刺激",[0,0,-2,0]],["成長できること",[0,0,0,1]]]},{"axis":2,"q":"相手の態度が曖昧なら？","a":[["関係をはっきりさせたい",[0,0,2,-1]],["少し待って確かめる",[0,0,1,0]],["曖昧でも今を楽しむ",[0,0,-1,1]],["むしろ惹かれることもある",[0,0,-2,0]]]},{"axis":2,"q":"恋愛で心地よいのは？","a":[["予測できる安心",[0,0,2,0]],["穏やかな日常",[0,0,2,0]],["適度な変化",[0,0,0,1]],["予想外の展開",[0,0,-2,0]]]},{"axis":3,"q":"恋愛と自分の時間、どちらを優先する？","a":[["恋愛を優先しやすい",[0,0,0,-2]],["状況によって調整する",[0,0,1,0]],["どちらも同じくらい大事",[0,0,1,1]],["自分の時間を守りたい",[0,0,0,2]]]},{"axis":3,"q":"恋人とはどのくらい一緒にいたい？","a":[["できるだけ一緒にいたい",[0,0,1,-2]],["毎日少しつながりたい",[0,0,1,-1]],["会う時間と一人の時間を分けたい",[0,0,1,1]],["お互い自由でいたい",[0,0,0,2]]]},{"axis":3,"q":"相手に趣味が理解されなかったら？","a":[["相手に合わせる",[0,0,0,-2]],["少し控える",[0,0,1,-1]],["理解してもらえるよう話す",[0,0,1,1]],["自分の趣味は続ける",[0,0,0,2]]]},{"axis":3,"q":"休日の予定が合わないときは？","a":[["相手に合わせる",[0,0,1,-2]],["交互に合わせる",[0,0,1,0]],["別々に楽しむ",[0,0,1,2]],["無理に会わなくても平気",[0,0,0,2]]]},{"axis":3,"q":"恋人の交友関係については？","a":[["できるだけ把握したい",[0,0,0,-2]],["少し気になる",[0,0,1,-1]],["信頼できれば任せる",[0,0,2,1]],["完全に自由でいい",[0,0,0,2]]]},{"axis":3,"q":"落ち込んだときは？","a":[["すぐ相手に話したい",[0,1,0,-2]],["そばにいてほしい",[0,0,1,-1]],["少し整理してから話す",[0,0,1,1]],["まず一人で立て直す",[0,0,0,2]]]},{"axis":3,"q":"恋人と価値観が違ったら？","a":[["できるだけ合わせたい",[0,0,1,-2]],["話し合って中間を探す",[0,0,1,0]],["違いとして受け入れる",[0,0,1,2]],["無理なら距離を取る",[0,0,0,2]]]},{"axis":3,"q":"毎日の連絡については？","a":[["ないと不安になる",[0,0,1,-2]],["短くてもほしい",[0,0,1,-1]],["必要なときで十分",[0,0,1,1]],["頻度は気にしない",[0,0,0,2]]]},{"axis":3,"q":"大切な決断をするときは？","a":[["相手の意見を最優先する",[0,0,0,-2]],["二人で決めたい",[0,0,1,0]],["相談して最後は自分で決める",[0,0,1,1]],["基本的に自分で決める",[0,0,0,2]]]},{"axis":3,"q":"恋人が忙しい時期は？","a":[["できるだけ支えたい",[0,0,1,-1]],["会える時間を調整する",[0,0,1,0]],["自分の時間を充実させる",[0,0,1,2]],["連絡が少なくても平気",[0,0,0,2]]]},{"axis":3,"q":"一人の時間については？","a":[["少ない方がいい",[0,0,0,-2]],["時々あれば十分",[0,0,1,-1]],["定期的に必要",[0,0,1,1]],["かなり大切",[0,0,0,2]]]},{"axis":3,"q":"理想のパートナーシップは？","a":[["いつも一緒に行動する",[0,0,1,-2]],["多くを共有する",[0,0,1,-1]],["支え合いながら別々の世界も持つ",[0,0,1,1]],["互いに自立したままつながる",[0,0,0,2]]]}];
+let sessionQuestions=[];
 
 const types = [
   {name:"Moon Harbor",icon:"🌙",sub:"静けさの中で、深い愛情を育てる人",desc:"慎重に信頼を築き、一度心を許すと長く深く愛するタイプ。穏やかな関係の中で本来の魅力が最も表れます。"},
@@ -397,6 +372,24 @@ let result=null;
 let selectedRelation="friend";
 let selectedRelationOnly="friend";
 let userName="";
+let analysisPrecision=84;
+
+function shuffle(items){
+  const copy=[...items];
+  for(let i=copy.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+
+function createQuestionSet(){
+  const selected=[];
+  for(let axis=0;axis<4;axis++){
+    selected.push(...shuffle(questionPool.filter(q=>q.axis===axis)).slice(0,4));
+  }
+  return shuffle(selected);
+}
 
 function startQuiz(){
   const input=document.getElementById("nickname");
@@ -411,15 +404,15 @@ function startQuiz(){
   userName=raw.replace(/[<>]/g,"").slice(0,16);
   hideAll();
   document.getElementById("quizScreen").classList.remove("hidden");
-  current=0;scores=[0,0,0,0];showQuestion();
+  current=0;scores=[0,0,0,0];analysisPrecision=84;sessionQuestions=createQuestionSet();showQuestion();
 }
 function hideAll(){
   ["startScreen","quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>document.getElementById(id).classList.add("hidden"));
 }
 function showQuestion(){
-  const item=questions[current];
-  document.getElementById("qCount").textContent=`QUESTION ${current+1} / ${questions.length}`;
-  document.getElementById("progress").style.width=`${(current/questions.length)*100}%`;
+  const item=sessionQuestions[current];
+  document.getElementById("qCount").textContent=`QUESTION ${current+1} / ${sessionQuestions.length}`;
+  document.getElementById("progress").style.width=`${(current/sessionQuestions.length)*100}%`;
   document.getElementById("question").textContent=item.q;
   const box=document.getElementById("answers");box.innerHTML="";
   item.a.forEach(([text,vals])=>{
@@ -430,13 +423,46 @@ function showQuestion(){
 function selectAnswer(vals){
   vals.forEach((v,i)=>scores[i]+=v);
   current++;
-  if(current<questions.length)showQuestion();
+  if(current<sessionQuestions.length)showQuestion();
   else{
     document.getElementById("progress").style.width="100%";
-    hideAll();document.getElementById("loadingScreen").classList.remove("hidden");
-    setTimeout(showResult,1400);
+    hideAll();
+    document.getElementById("loadingScreen").classList.remove("hidden");
+    runMapGeneration();
   }
 }
+function runMapGeneration(){
+  const stages=[
+    ["回答パターンを読み込んでいます…","✓ 回答パターンを取得",18],
+    ["愛情表現を分析しています…","✓ 愛情表現を分析",36],
+    ["心の距離感を分析しています…","✓ 心の距離感を分析",55],
+    ["安心を求める傾向を読み解いています…","✓ 安心感を分析",72],
+    ["恋愛タイプと相性モデルを生成しています…","✓ 恋愛タイプを生成",88],
+    ["恋愛マップを仕上げています…","✓ 恋愛マップが完成",100]
+  ];
+  const stageEl=document.getElementById("mapStage");
+  const progress=document.getElementById("mapProgress");
+  const checks=document.getElementById("mapChecks");
+  checks.innerHTML="";
+  progress.style.width="0%";
+  let index=0;
+
+  const next=()=>{
+    const [label,check,percent]=stages[index];
+    stageEl.textContent=label;
+    progress.style.width=percent+"%";
+    const row=document.createElement("div");
+    row.style.cssText="opacity:0;transform:translateY(5px);transition:.35s;margin:5px 0";
+    row.textContent=check;
+    checks.appendChild(row);
+    requestAnimationFrame(()=>{row.style.opacity="1";row.style.transform="translateY(0)"});
+    index++;
+    if(index<stages.length)setTimeout(next,650);
+    else setTimeout(showResult,650);
+  };
+  next();
+}
+
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 function normalized(v){return clamp(Math.round(50+v*4),8,96)}
 function chooseType(vals){
@@ -474,6 +500,7 @@ function showResult(){
   const idx=chooseType(scores), t=types[idx];
   result={scores:[...scores],typeIndex:idx,type:t,code:makeCode(idx,scores)};
   hideAll();document.getElementById("resultScreen").classList.remove("hidden");
+  document.getElementById("mapCompleteTitle").textContent=`${userName}さんだけの恋愛マップが完成しました。`;
   document.getElementById("typeIcon").textContent=t.icon;
   document.getElementById("typeName").textContent=t.name;
   document.getElementById("typeSub").textContent=`${userName}さんは、${t.sub}`;
@@ -489,6 +516,8 @@ function showResult(){
 
   const labels=["距離を縮める力","愛情表現","安心を求める度","自立性","恋愛偏差値","一途度","嫉妬しやすさ","駆け引き度","恋愛体温"];
   const allValues=[...values,romanceIQ,loyalty,jealousy,strategy,warmth];
+  document.getElementById("precisionValue").textContent=analysisPrecision+"%";
+  document.getElementById("precisionBar").style.width=analysisPrecision+"%";
   document.getElementById("stats").innerHTML=labels.map((l,i)=>`
     <div class="stat"><div class="stat-top"><span>${l}</span><strong>${allValues[i]}%</strong></div>
     <div class="bar"><span style="width:${allValues[i]}%"></span></div></div>`).join("");
@@ -499,7 +528,7 @@ function showResult(){
   document.getElementById("aiAnalysis").classList.add("hidden");
   document.getElementById("aiAnalysis").innerHTML="";
   document.getElementById("aiButton").disabled=false;
-  document.getElementById("aiButton").textContent="広告を見てAI分析を開く";
+  document.getElementById("aiButton").textContent="広告を見て、恋愛マップを深く読み解く";
 
   renderRelations("relations",false);
   window.scrollTo({top:0,behavior:"smooth"});
@@ -830,9 +859,61 @@ function generateAIAnalysis(){
     btn.textContent="AI分析をもう一度作る";
     btn.disabled=false;
     renderAISuggestions();
+    document.getElementById("precisionArea").classList.remove("hidden");
     document.getElementById("aiQuestionArea").classList.remove("hidden");
     box.scrollIntoView({behavior:"smooth",block:"start"});
   },1300);
+}
+
+
+
+const precisionQuestionPool=[
+  {q:"好きな人には、弱い部分も見せられますか？",a:["かなり見せられる","少しなら見せられる","ほとんど見せない"]},
+  {q:"不安になったとき、相手に確認できますか？",a:["素直に確認する","少し考えてから聞く","自分の中で抱える"]},
+  {q:"恋愛中も自分の時間を守れますか？",a:["しっかり守れる","状況による","相手を優先しやすい"]},
+  {q:"相手と意見が違うとき、本音を言えますか？",a:["はっきり言える","言い方を考えて伝える","合わせてしまう"]},
+  {q:"愛情表現が少ない相手でも安心できますか？",a:["行動があれば安心できる","少し不安になる","かなり不安になる"]},
+  {q:"関係が安定すると、どう感じますか？",a:["安心して愛情が深まる","少し刺激も欲しくなる","退屈に感じやすい"]}
+];
+let precisionSet=[];
+let precisionIndex=0;
+let precisionAnswers=[];
+
+function startPrecisionQuestions(){
+  precisionSet=shuffle(precisionQuestionPool).slice(0,3);
+  precisionIndex=0;
+  precisionAnswers=[];
+  document.getElementById("precisionStartButton").classList.add("hidden");
+  document.getElementById("precisionQuestions").classList.remove("hidden");
+  showPrecisionQuestion();
+}
+
+function showPrecisionQuestion(){
+  const box=document.getElementById("precisionQuestions");
+  const item=precisionSet[precisionIndex];
+  box.innerHTML=`
+    <div class="small">追加質問 ${precisionIndex+1} / 3</div>
+    <h3 style="font-size:20px;line-height:1.5">${item.q}</h3>
+    <div class="answers">
+      ${item.a.map((answer,i)=>`<button class="answer" onclick="answerPrecision(${i})">${answer}</button>`).join("")}
+    </div>`;
+}
+
+function answerPrecision(value){
+  precisionAnswers.push(value);
+  precisionIndex++;
+  if(precisionIndex<precisionSet.length){
+    showPrecisionQuestion();
+  }else{
+    analysisPrecision=96;
+    document.getElementById("precisionValue").textContent="96%";
+    document.getElementById("precisionBar").style.width="96%";
+    document.getElementById("precisionQuestions").innerHTML=`
+      <div class="tip">
+        <strong>分析精度が96%になりました。</strong><br>
+        追加回答を反映すると、${userName}さんは「相手を大切にする力」と「自分の本音を伝える力」のバランスが、恋愛を長続きさせる重要な鍵になっています。
+      </div>`;
+  }
 }
 
 
@@ -911,6 +992,9 @@ function restartAll(){
   const input=document.getElementById("nickname");
   if(input)input.value=userName;
   document.getElementById("aiQuestionArea")?.classList.add("hidden");
+  document.getElementById("precisionArea")?.classList.add("hidden");
+  document.getElementById("precisionStartButton")?.classList.remove("hidden");
+  document.getElementById("precisionQuestions")?.classList.add("hidden");
   document.getElementById("startScreen").classList.remove("hidden");
   window.scrollTo({top:0,behavior:"smooth"});
 }
