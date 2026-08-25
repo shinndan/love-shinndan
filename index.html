@@ -183,7 +183,7 @@ button{cursor:pointer}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="badge">CORE DIAGNOSIS 2.4</span>
+    <span class="badge">CORE DIAGNOSIS 2.4.1</span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -1026,7 +1026,7 @@ const presetAITopics=[
   {id:"view",label:"恋人から見た私は？",weight:p=>p.warmth+p.expression*.6},
   {id:"line",label:"LINEではどんなタイプ？",weight:p=>p.stability+p.jealousy*.7},
   {id:"marriage",label:"結婚したらどうなる？",weight:p=>p.loyalty+p.stability},
-  {id:"breakup",label:"失恋しやすい理由",weight:p=>p.loyalty+p.jealousy},
+  {id:"breakup",label:"失恋で傷つきやすい理由",weight:p=>p.loyalty+p.jealousy},
   {id:"long",label:"長続きするコツ",weight:p=>p.loyalty+p.stability+p.expression*.3},
   {id:"weak",label:"恋愛で気をつけること",weight:p=>Math.max(p.jealousy,100-p.independence,100-p.expression)*1.2},
   {id:"strong",label:"私の恋愛での強み",weight:p=>Math.max(p.warmth,p.loyalty,p.expression,p.independence)},
@@ -1097,9 +1097,21 @@ function presetAnswer(id,p){
   }
 
   if(id==="breakup"){
+    const reason = p.loyalty>=75
+      ? "一度大切にした相手との思い出や約束を、簡単に切り離せない"
+      : p.stability>=70
+        ? "関係が終わったこと以上に、安心できる日常が突然なくなることを大きく感じやすい"
+        : "別れの理由や相手の本心が分からないままだと、気持ちの整理に時間がかかりやすい";
+
+    const reaction = p.jealousy>=65
+      ? "別れたあとも、相手の言葉や行動を何度も思い返し、『本当は違ったのでは』と考え続けやすい傾向があります。"
+      : p.independence<45
+        ? "恋愛中に相手を優先していた分、別れたあとに生活の空白を大きく感じやすい傾向があります。"
+        : "一度気持ちを整理できれば、自分の生活へ戻っていく力も持っています。";
+
     return ["失恋で傷つきやすい理由",
-      `${userName}さんは、${p.loyalty>=75?"一度大切にした相手への気持ちを簡単には切り替えにくい":"別れそのものより、理由が分からない状態に心が残りやすい"}タイプです。${p.jealousy>=65?"相手の小さな変化を深読みしやすく、別れの前から不安を抱え込みやすい傾向もあります。":"状況を整理できれば、自分の生活へ戻る力も持っています。"}`,
-      "相手の本心を推測し続けるより、次の関係で譲れない条件を3つ書き出す方が回復につながります。"];
+      `${userName}さんが失恋で傷つきやすいのは、${reason}からです。${reaction}`,
+      "回復のためには、相手の本心を推測し続けるより、『失ったもの』『残ったもの』『次の恋愛で譲れないこと』を分けて整理する方が効果的です。"];
   }
 
   if(id==="long"){
