@@ -183,7 +183,7 @@ button{cursor:pointer}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="badge">CORE DIAGNOSIS 2.0</span>
+    <span class="badge">CORE DIAGNOSIS 2.1</span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -299,9 +299,9 @@ button{cursor:pointer}
         <div id="precisionArea" class="hidden" style="margin-top:16px">
           <div class="tip">
             <strong>さらに精度を上げますか？</strong><br>
-            3つの追加質問に答えると、分析精度が最大96%まで上がります。
+            48種類の追加質問から、今回の回答傾向に合わせて選ばれた3問に答えると、分析精度が最大96%まで上がります。
           </div>
-          <button id="precisionStartButton" class="secondary" style="width:100%;margin-top:12px" onclick="startPrecisionQuestions()">3問に答えて精度を上げる</button>
+          <button id="precisionStartButton" class="secondary" style="width:100%;margin-top:12px" onclick="startPrecisionQuestions()">今回選ばれた3問に答える</button>
           <div id="precisionQuestions" class="hidden" style="margin-top:14px"></div>
         </div>
 
@@ -905,20 +905,49 @@ function generateAIAnalysis(){
 
 
 
-const precisionQuestionPool=[
-  {q:"好きな人には、弱い部分も見せられますか？",a:["かなり見せられる","少しなら見せられる","ほとんど見せない"]},
-  {q:"不安になったとき、相手に確認できますか？",a:["素直に確認する","少し考えてから聞く","自分の中で抱える"]},
-  {q:"恋愛中も自分の時間を守れますか？",a:["しっかり守れる","状況による","相手を優先しやすい"]},
-  {q:"相手と意見が違うとき、本音を言えますか？",a:["はっきり言える","言い方を考えて伝える","合わせてしまう"]},
-  {q:"愛情表現が少ない相手でも安心できますか？",a:["行動があれば安心できる","少し不安になる","かなり不安になる"]},
-  {q:"関係が安定すると、どう感じますか？",a:["安心して愛情が深まる","少し刺激も欲しくなる","退屈に感じやすい"]}
-];
+const precisionQuestionPool=[{"id":"open01","cat":"本音","q":"好きな人には、弱い部分も見せられますか？","a":[["かなり見せられる",2],["少しなら見せられる",1],["ほとんど見せない",0]]},{"id":"open02","cat":"本音","q":"寂しいと感じたとき、その気持ちを伝えられますか？","a":[["素直に伝える",2],["遠回しに伝える",1],["隠してしまう",0]]},{"id":"open03","cat":"本音","q":"相手に嫌われるかもしれなくても、本音を言えますか？","a":[["大切なことなら言える",2],["言い方をかなり考える",1],["合わせてしまう",0]]},{"id":"open04","cat":"本音","q":"恋人の前で無理に明るく振る舞うことはありますか？","a":[["ほとんどない",2],["時々ある",1],["よくある",0]]},{"id":"open05","cat":"本音","q":"相手にしてほしいことを、具体的にお願いできますか？","a":[["具体的に言える",2],["少し遠慮する",1],["察してほしいと思う",0]]},{"id":"open06","cat":"本音","q":"自分の不安を話したあと、後悔しやすいですか？","a":[["あまり後悔しない",2],["少し気になる",1],["かなり後悔する",0]]},{"id":"safe01","cat":"安心感","q":"返信がいつもより遅いとき、どのくらい気になりますか？","a":[["事情があると思える",2],["少し気になる",1],["悪い想像をしてしまう",0]]},{"id":"safe02","cat":"安心感","q":"相手の気持ちが分からないとき、確認できますか？","a":[["落ち着いて確認する",2],["しばらく様子を見る",1],["一人で考え続ける",0]]},{"id":"safe03","cat":"安心感","q":"相手が友達と出かけることについてどう感じますか？","a":[["信頼して楽しんでほしい",2],["少し気になる",1],["かなり不安になる",0]]},{"id":"safe04","cat":"安心感","q":"会えない期間が続いても、関係を信じられますか？","a":[["信じられる",2],["連絡があれば大丈夫",1],["かなり不安になる",0]]},{"id":"safe05","cat":"安心感","q":"恋人の態度が少し冷たく感じたときは？","a":[["一時的なものと考える",2],["理由を考える",1],["嫌われたと思いやすい",0]]},{"id":"safe06","cat":"安心感","q":"相手から愛情表現が少なくても、行動から受け取れますか？","a":[["受け取れる",2],["時々不安になる",1],["言葉がないと難しい",0]]},{"id":"ind01","cat":"自立性","q":"恋愛中も、自分の時間を守れますか？","a":[["しっかり守れる",2],["状況による",1],["相手を優先しやすい",0]]},{"id":"ind02","cat":"自立性","q":"恋人と予定が合わない休日はどうしますか？","a":[["自分の予定を楽しむ",2],["別の日を提案する",1],["予定を空けて待つ",0]]},{"id":"ind03","cat":"自立性","q":"相手の機嫌が悪いと、自分まで強く影響されますか？","a":[["必要以上に背負わない",2],["少し影響される",1],["自分の責任に感じる",0]]},{"id":"ind04","cat":"自立性","q":"恋人と違う趣味を、そのまま続けられますか？","a":[["続けられる",2],["少し控える",1],["相手に合わせる",0]]},{"id":"ind05","cat":"自立性","q":"大切な決断をするとき、最後は自分で決められますか？","a":[["自分で決められる",2],["相手と相談して決める",1],["相手の意見を優先する",0]]},{"id":"ind06","cat":"自立性","q":"恋人が忙しいとき、自分の生活を充実させられますか？","a":[["充実させられる",2],["少し寂しいが過ごせる",1],["相手の連絡を待ち続ける",0]]},{"id":"com01","cat":"会話","q":"意見がぶつかったとき、話し合いを続けられますか？","a":[["落ち着いて続ける",2],["時間を置いて話す",1],["避けてしまう",0]]},{"id":"com02","cat":"会話","q":"相手の話を聞くとき、結論より気持ちを聞けますか？","a":[["気持ちまで聞く",2],["内容を整理して聞く",1],["すぐ解決策を出す",0]]},{"id":"com03","cat":"会話","q":"自分が悪かったとき、素直に謝れますか？","a":[["すぐ謝れる",2],["落ち着いてから謝る",1],["意地を張りやすい",0]]},{"id":"com04","cat":"会話","q":"相手への不満は、たまる前に伝えられますか？","a":[["早めに伝える",2],["ある程度たまってから",1],["限界まで我慢する",0]]},{"id":"com05","cat":"会話","q":"相手の言葉を、自分の解釈だけで決めつけることはありますか？","a":[["確認するようにしている",2],["時々ある",1],["よくある",0]]},{"id":"com06","cat":"会話","q":"ケンカのあと、関係を戻すきっかけを作れますか？","a":[["自分から作れる",2],["相手の様子を見て動く",1],["相手から来るまで待つ",0]]},{"id":"bound01","cat":"境界線","q":"無理なお願いをされたとき、断れますか？","a":[["きちんと断れる",2],["理由をつけて断る",1],["無理して受け入れる",0]]},{"id":"bound02","cat":"境界線","q":"恋人のために、自分の予定を何度も変えることは？","a":[["必要なときだけ",2],["時々ある",1],["よくある",0]]},{"id":"bound03","cat":"境界線","q":"嫌だと感じたスキンシップを、伝えられますか？","a":[["すぐ伝えられる",2],["少し迷って伝える",1],["我慢してしまう",0]]},{"id":"bound04","cat":"境界線","q":"相手の期待に応えられないと、罪悪感を持ちやすいですか？","a":[["必要以上には持たない",2],["少し持つ",1],["強く持つ",0]]},{"id":"bound05","cat":"境界線","q":"相手を支えることと、自分を犠牲にすることを区別できますか？","a":[["区別できる",2],["時々分からなくなる",1],["区別しにくい",0]]},{"id":"bound06","cat":"境界線","q":"相手に合わせすぎて疲れた経験はありますか？","a":[["ほとんどない",2],["時々ある",1],["よくある",0]]},{"id":"aff01","cat":"愛情表現","q":"好意を言葉で伝えることに抵抗はありますか？","a":[["自然に伝えられる",2],["大切なときなら言える",1],["かなり照れる",0]]},{"id":"aff02","cat":"愛情表現","q":"相手の小さな変化に気づいたら、声をかけますか？","a":[["すぐ声をかける",2],["様子を見て声をかける",1],["気づいても言わない",0]]},{"id":"aff03","cat":"愛情表現","q":"感謝はどのくらい言葉にしますか？","a":[["小さなことでも伝える",2],["大切なときに伝える",1],["行動で分かってほしい",0]]},{"id":"aff04","cat":"愛情表現","q":"相手から愛情を受け取ったとき、素直に喜べますか？","a":[["素直に喜べる",2],["少し照れる",1],["疑ってしまう",0]]},{"id":"aff05","cat":"愛情表現","q":"恋人を褒めるとき、具体的に伝えられますか？","a":[["具体的に伝える",2],["簡単に伝える",1],["あまり言わない",0]]},{"id":"aff06","cat":"愛情表現","q":"会いたいとき、そのまま『会いたい』と言えますか？","a":[["言える",2],["予定を聞く形で伝える",1],["相手から言うのを待つ",0]]},{"id":"trust01","cat":"信頼","q":"嫉妬したとき、その感情をどう扱いますか？","a":[["落ち着いて理由を考える",2],["相手に少し伝える",1],["態度に強く出る",0]]},{"id":"trust02","cat":"信頼","q":"相手のスマホを見たいと思うことはありますか？","a":[["ほとんどない",2],["不安なときだけ思う",1],["確認したくなる",0]]},{"id":"trust03","cat":"信頼","q":"過去の恋愛について、相手と比べてしまいますか？","a":[["ほとんど比べない",2],["時々比べる",1],["よく比べる",0]]},{"id":"trust04","cat":"信頼","q":"相手が異性と仲良く話していたら？","a":[["関係を信頼する",2],["少し気になる",1],["強く不安になる",0]]},{"id":"trust05","cat":"信頼","q":"一度傷ついたあと、再び相手を信じるには？","a":[["行動を見ながら信じ直す",2],["かなり時間が必要",1],["ほとんど信じられない",0]]},{"id":"trust06","cat":"信頼","q":"相手の説明に納得できないときは？","a":[["もう一度落ち着いて聞く",2],["しばらく様子を見る",1],["疑い続ける",0]]},{"id":"future01","cat":"将来","q":"関係が深まったら、将来の話をしたいですか？","a":[["自然に話したい",2],["時期を見て話したい",1],["重く感じやすい",0]]},{"id":"future02","cat":"将来","q":"恋人との生活習慣の違いは、話し合えますか？","a":[["具体的に話し合える",2],["大きな違いだけ話す",1],["相手に合わせる",0]]},{"id":"future03","cat":"将来","q":"関係が安定すると、どんな気持ちになりますか？","a":[["安心して愛情が深まる",2],["少し刺激も欲しくなる",1],["退屈に感じやすい",0]]},{"id":"future04","cat":"将来","q":"お金や生活の価値観を、恋人と話せますか？","a":[["早めに話せる",2],["必要になったら話す",1],["話しにくい",0]]},{"id":"future05","cat":"将来","q":"長く付き合うために必要だと思うのは？","a":[["信頼と対話",2],["愛情の強さ",1],["相手に合わせること",0]]},{"id":"future06","cat":"将来","q":"恋人との違いを、関係の個性として受け入れられますか？","a":[["受け入れられる",2],["違いによる",1],["同じであってほしい",0]]}];
 let precisionSet=[];
 let precisionIndex=0;
 let precisionAnswers=[];
 
 function startPrecisionQuestions(){
-  precisionSet=shuffle(precisionQuestionPool).slice(0,3);
+  let recentIds=[];
+  try{
+    recentIds=JSON.parse(localStorage.getItem("lsmRecentPrecisionQuestions")||"[]");
+  }catch(e){
+    recentIds=[];
+  }
+
+  const available=precisionQuestionPool.filter(item=>!recentIds.includes(item.id));
+  const source=available.length>=3?available:precisionQuestionPool;
+
+  // 同じ分野ばかりにならないよう、カテゴリを先にランダム選択
+  const categories=shuffle([...new Set(source.map(item=>item.cat))]);
+  precisionSet=[];
+  categories.forEach(cat=>{
+    if(precisionSet.length>=3)return;
+    const candidates=shuffle(source.filter(item=>item.cat===cat));
+    if(candidates.length)precisionSet.push(candidates[0]);
+  });
+
+  // 万一3問に満たない場合の補完
+  if(precisionSet.length<3){
+    const selectedIds=precisionSet.map(item=>item.id);
+    precisionSet.push(
+      ...shuffle(source.filter(item=>!selectedIds.includes(item.id)))
+        .slice(0,3-precisionSet.length)
+    );
+  }
+
+  const updatedRecent=[
+    ...precisionSet.map(item=>item.id),
+    ...recentIds
+  ].filter((id,index,array)=>array.indexOf(id)===index).slice(0,18);
+
+  try{
+    localStorage.setItem("lsmRecentPrecisionQuestions",JSON.stringify(updatedRecent));
+  }catch(e){}
+
   precisionIndex=0;
   precisionAnswers=[];
   document.getElementById("precisionStartButton").classList.add("hidden");
@@ -933,25 +962,64 @@ function showPrecisionQuestion(){
     <div class="small">追加質問 ${precisionIndex+1} / 3</div>
     <h3 style="font-size:20px;line-height:1.5">${item.q}</h3>
     <div class="answers">
-      ${item.a.map((answer,i)=>`<button class="answer" onclick="answerPrecision(${i})">${answer}</button>`).join("")}
+      ${item.a.map((answer,i)=>`<button class="answer" onclick="answerPrecision(${i})">${answer[0]}</button>`).join("")}
     </div>`;
 }
 
 function answerPrecision(value){
-  precisionAnswers.push(value);
+  precisionAnswers.push({
+    category:precisionSet[precisionIndex].cat,
+    score:precisionSet[precisionIndex].a[value][1],
+    answer:precisionSet[precisionIndex].a[value][0]
+  });
   precisionIndex++;
+
   if(precisionIndex<precisionSet.length){
     showPrecisionQuestion();
-  }else{
-    analysisPrecision=96;
-    document.getElementById("precisionValue").textContent="96%";
-    document.getElementById("precisionBar").style.width="96%";
-    document.getElementById("precisionQuestions").innerHTML=`
-      <div class="tip">
-        <strong>${userName}さんへの分析精度が96%になりました。</strong><br>
-        追加回答を反映すると、「相手を大切にする力」と「自分の本音を伝える力」のバランスが、恋愛を長続きさせる重要な鍵だと分かりました。
-      </div>`;
+    return;
   }
+
+  analysisPrecision=96;
+  document.getElementById("precisionValue").textContent="96%";
+  document.getElementById("precisionBar").style.width="96%";
+
+  const sorted=[...precisionAnswers].sort((a,b)=>b.score-a.score);
+  const strongest=sorted[0];
+  const growth=sorted[sorted.length-1];
+
+  const strengthTexts={
+    "本音":"大切な気持ちを言葉にして、相手と深くつながる力",
+    "安心感":"不安だけで結論を出さず、関係を落ち着いて見る力",
+    "自立性":"恋愛と自分の生活を両方大切にできる力",
+    "会話":"すれ違いを対話によって整えようとする力",
+    "境界線":"相手を大切にしながら、自分の限界も守る力",
+    "愛情表現":"好意や感謝を相手に届く形で表す力",
+    "信頼":"相手を尊重しながら、事実を確かめようとする力",
+    "将来":"今の感情だけでなく、長い関係を考える力"
+  };
+
+  const growthTexts={
+    "本音":"本音を我慢しすぎる前に、小さな希望から伝えること",
+    "安心感":"相手の反応を想像だけで決めず、落ち着いて確認すること",
+    "自立性":"相手を優先する日と、自分を優先する日を分けること",
+    "会話":"不満が大きくなる前に、責めない言葉で共有すること",
+    "境界線":"無理なことには、優しくても明確に線を引くこと",
+    "愛情表現":"察してもらうのを待たず、短い言葉で好意を伝えること",
+    "信頼":"不安を証拠探しに変えず、気持ちとして共有すること",
+    "将来":"将来の価値観を、重い話にせず少しずつ確認すること"
+  };
+
+  const strength=strengthTexts[strongest.category]||"相手を大切にする力";
+  const advice=growthTexts[growth.category]||"自分の本音も同じくらい大切にすること";
+
+  document.getElementById("precisionQuestions").innerHTML=`
+    <div class="tip">
+      <strong>${userName}さんへの分析精度が96%になりました。</strong><br>
+      今回の追加回答では、特に「${strongest.category}」の傾向から、
+      ${strength}が表れています。<br><br>
+      一方で、恋愛をより安定させるために意識したいのは、
+      ${advice}です。
+    </div>`;
 }
 
 
