@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#101013">
+<title>Love Style Map｜恋愛スタイル診断</title>
+<meta name="description" content="あなたの恋愛スタイルを分析し、相性コードで相手との関係性も診断できるオリジナル診断。">
+<style>
+:root{
+  --bg:#0d0d10;
+  --panel:#17171c;
+  --panel2:#202027;
+  --text:#f7f3ee;
+  --muted:#aaa5a0;
+  --line:#34343d;
+  --accent:#d8b77a;
+  --accent2:#f0d8aa;
+  --danger:#d97b7b;
+  --shadow:0 18px 55px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top right, rgba(216,183,122,.13), transparent 32%),
+    linear-gradient(180deg,#0b0b0e,#111116 45%,#0b0b0e);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  line-height:1.8;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(92%,720px);margin:auto;padding:28px 0 70px}
+.brand{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:26px;color:var(--accent2);letter-spacing:.18em;
+  font-size:12px;font-weight:700;
+}
+.badge{
+  border:1px solid rgba(216,183,122,.35);
+  padding:6px 10px;border-radius:999px;letter-spacing:.08em;color:var(--muted);
+}
+.hero{text-align:center;padding:34px 16px 26px}
+.hero h1{font-size:clamp(34px,9vw,62px);line-height:1.08;margin:0 0 14px;letter-spacing:.02em}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);margin:0 auto;max-width:560px}
+.panel{
+  background:linear-gradient(180deg,rgba(31,31,38,.96),rgba(20,20,25,.98));
+  border:1px solid var(--line);border-radius:26px;padding:24px;
+  box-shadow:var(--shadow);margin-top:18px;
+}
+.start-grid{display:grid;gap:12px;margin-top:22px}
+.primary,.secondary,.ghost,.relation-btn{
+  border-radius:15px;padding:15px 18px;border:1px solid transparent;font-weight:700;
+}
+.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#17120b}
+.secondary{background:var(--panel2);color:var(--text);border-color:var(--line)}
+.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
+.primary:active,.secondary:active,.ghost:active,.relation-btn:active{transform:scale(.99)}
+.small{font-size:13px;color:var(--muted)}
+.hidden{display:none!important}
+.progress-shell{height:8px;background:#292930;border-radius:99px;overflow:hidden;margin-bottom:20px}
+.progress{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#f3e1bd);transition:.25s}
+.q-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+.question{font-size:24px;line-height:1.45;margin:18px 0 20px}
+.answers{display:grid;gap:11px}
+.answer{
+  text-align:left;background:#1f1f26;color:var(--text);border:1px solid #373741;
+  border-radius:16px;padding:16px 17px;
+}
+.answer:hover{border-color:var(--accent);background:#24242b}
+.loading{text-align:center;padding:36px 10px}
+.orbit{
+  width:74px;height:74px;border-radius:50%;margin:0 auto 20px;
+  border:2px solid #393942;border-top-color:var(--accent);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result-head{text-align:center;padding:10px 0 24px}
+.kicker{font-size:12px;letter-spacing:.22em;color:var(--accent2);font-weight:700}
+.type-icon{font-size:70px;margin:8px 0 4px}
+.type-name{font-size:40px;line-height:1.12;margin:0;color:var(--accent2)}
+.type-sub{font-size:18px;margin:10px auto;color:#e8e0d5}
+.code-box{
+  margin:22px auto 0;border:1px dashed rgba(216,183,122,.5);border-radius:18px;
+  padding:14px 16px;max-width:420px;background:rgba(216,183,122,.06)
+}
+.code{font-size:20px;letter-spacing:.12em;font-weight:800;color:var(--accent2)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 8px}
+.stat{background:#1a1a20;border:1px solid var(--line);border-radius:16px;padding:13px}
+.stat-top{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.bar{height:7px;background:#2b2b33;border-radius:99px;overflow:hidden;margin-top:9px}
+.bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#f0d8aa)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.section{
+  border-top:1px solid var(--line);padding:30px 2px 8px;margin-top:14px;
+}
+.section h2{font-size:27px;line-height:1.35;margin:0 0 13px;color:#fff}
+.section p{margin:0;color:#d5d0ca}
+.tip{
+  margin-top:16px;padding:15px;border-left:3px solid var(--accent);
+  background:rgba(216,183,122,.07);border-radius:0 12px 12px 0;color:#e7dfd3
+}
+.compat-title{text-align:center;margin-bottom:8px}
+.compat-form{display:grid;gap:12px;margin-top:18px}
+.compat-input{
+  width:100%;background:#101014;color:var(--text);border:1px solid var(--line);
+  border-radius:14px;padding:15px;text-transform:uppercase;letter-spacing:.08em
+}
+.relations{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.relation-btn{background:#1c1c22;color:#ddd;border-color:var(--line);font-size:14px}
+.relation-btn.active{border-color:var(--accent);color:var(--accent2);background:rgba(216,183,122,.1)}
+.compat-result{margin-top:18px;padding:20px;border-radius:18px;background:#121217;border:1px solid var(--line)}
+.score-ring{
+  width:112px;height:112px;border-radius:50%;display:grid;place-items:center;
+  margin:0 auto 16px;background:conic-gradient(var(--accent) var(--score),#2d2d35 0);
+  position:relative
+}
+.score-ring:after{content:"";position:absolute;inset:9px;background:#121217;border-radius:50%}
+.score-ring strong{position:relative;z-index:1;font-size:28px}
+.ad-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:999;
+  display:grid;place-items:center;padding:24px
+}
+.ad-card{
+  width:min(92vw,420px);background:#19191f;border:1px solid var(--line);
+  border-radius:22px;padding:26px;text-align:center
+}
+.ad-space{
+  height:170px;border:1px dashed #55545d;border-radius:14px;display:grid;place-items:center;
+  color:var(--muted);margin:16px 0
+}
+.notice{padding:12px 14px;border-radius:12px;background:#18181e;color:var(--muted);font-size:13px;margin-top:14px}
+.footer{text-align:center;color:#77717a;font-size:12px;padding-top:35px}
+@media(max-width:480px){
+  .panel{padding:19px;border-radius:22px}
+  .question{font-size:21px}
+  .type-name{font-size:34px}
+  .section h2{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <span>LOVE STYLE MAP</span>
+    <span class="badge">PROTOTYPE 01</span>
+  </div>
+
+  <section id="startScreen" class="panel">
+    <div class="hero">
+      <div class="kicker">YOUR RELATIONSHIP BLUEPRINT</div>
+      <h1>あなたの恋愛には、<br><span>まだ名前がない。</span></h1>
+      <p>12の質問から、心の距離・愛情表現・安心と刺激・自立性を分析。あなた独自の恋愛スタイルと、人とのつながり方を言葉にします。</p>
+      <div class="start-grid">
+        <button class="primary" onclick="startQuiz()">診断をはじめる</button>
+        <button class="secondary" onclick="showCompatibilityOnly()">相性コードを入力する</button>
+      </div>
+      <p class="small">性別に関係なく利用できます。診断結果は娯楽・自己理解を目的としたものです。</p>
+    </div>
+  </section>
+
+  <section id="quizScreen" class="panel hidden">
+    <div class="progress-shell"><div id="progress" class="progress"></div></div>
+    <div class="q-meta"><span id="qCount">QUESTION 1 / 12</span><span>直感で選んでください</span></div>
+    <div id="question" class="question"></div>
+    <div id="answers" class="answers"></div>
+  </section>
+
+  <section id="loadingScreen" class="panel hidden">
+    <div class="loading">
+      <div class="orbit"></div>
+      <h2>あなたの恋愛地図を作成中</h2>
+      <p class="small">距離感・表現・安定性・自立性を分析しています…</p>
+    </div>
+  </section>
+
+  <section id="resultScreen" class="hidden">
+    <div class="panel">
+      <div class="result-head">
+        <div class="kicker">YOUR LOVE STYLE</div>
+        <div id="typeIcon" class="type-icon">🌙</div>
+        <h1 id="typeName" class="type-name"></h1>
+        <p id="typeSub" class="type-sub"></p>
+
+        <div class="code-box">
+          <div class="small">あなたの LSM CODE</div>
+          <div id="lsmCode" class="code"></div>
+          <button class="ghost" style="margin-top:10px;padding:9px 14px" onclick="copyCode()">コードをコピー</button>
+        </div>
+      </div>
+
+      <div id="stats" class="stats"></div>
+
+      <div class="actions">
+        <button class="primary" onclick="saveResultImage()">画像を保存</button>
+        <button class="secondary" onclick="shareResult()">シェアする</button>
+      </div>
+      <div class="notice">「画像を保存」では、収益化後の動きを再現するため短い広告デモが表示されます。</div>
+
+      <div id="longResult"></div>
+    </div>
+
+    <div id="compatibilitySection" class="panel">
+      <h2 class="compat-title">相手との関係を読み解く</h2>
+      <p class="small" style="text-align:center">相手のLSM CODEを入力し、その人との現在の関係を選択してください。</p>
+
+      <div class="compat-form">
+        <input id="partnerCode" class="compat-input" maxlength="14" placeholder="例：LSM-ABCD-1234">
+        <div class="relations" id="relations"></div>
+        <button class="primary" onclick="analyzeCompatibility()">相性を分析する</button>
+      </div>
+      <div id="compatResult" class="compat-result hidden"></div>
+    </div>
+
+    <button class="ghost" style="width:100%;margin-top:18px" onclick="restartAll()">もう一度診断する</button>
+  </section>
+
+  <section id="compatOnly" class="panel hidden">
+    <h2 class="compat-title">相性コード分析</h2>
+    <p class="small" style="text-align:center">まず自分のコード、次に相手のコードを入力します。</p>
+    <div class="compat-form">
+      <input id="myCodeOnly" class="compat-input" maxlength="14" placeholder="自分のLSM CODE">
+      <input id="partnerCodeOnly" class="compat-input" maxlength="14" placeholder="相手のLSM CODE">
+      <div class="relations" id="relationsOnly"></div>
+      <button class="primary" onclick="analyzeCompatibilityOnly()">相性を分析する</button>
+      <button class="ghost" onclick="restartAll()">トップへ戻る</button>
+    </div>
+    <div id="compatResultOnly" class="compat-result hidden"></div>
+  </section>
+
+  <div class="footer">© LOVE STYLE MAP — Original Relationship Experience</div>
+</div>
+
+<div id="adOverlay" class="ad-overlay hidden">
+  <div class="ad-card">
+    <div class="kicker">SPONSORED</div>
+    <div class="ad-space">広告掲載スペース<br>（デモ表示）</div>
+    <p id="adCount">3秒後に画像を作成します</p>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {q:"気になる人ができたとき、最初の一歩は？", a:[
+    ["自分から会話や連絡を増やす",[2,0,0,0]],["相手の反応を見ながら近づく",[-1,0,1,0]],["自然なきっかけを待つ",[-2,0,0,1]],["まず友達として信頼を作る",[-1,0,2,1]]
+  ]},
+  {q:"愛情を伝えるなら、最も自分らしいのは？", a:[
+    ["言葉ではっきり伝える",[1,2,0,0]],["行動や気遣いで示す",[0,-1,1,1]],["一緒にいる時間で示す",[0,1,1,-1]],["あえて言いすぎず、相手に委ねる",[-1,-2,0,1]]
+  ]},
+  {q:"理想の関係に一番近いものは？", a:[
+    ["いつも一緒に熱量を共有する",[1,1,-2,-1]],["安心して帰ってこられる関係",[0,0,2,0]],["お互いを高め合える関係",[1,0,0,2]],["自由を尊重しながらつながる関係",[-1,0,0,2]]
+  ]},
+  {q:"連絡の頻度についてどう感じる？", a:[
+    ["多いほど安心する",[1,1,1,-2]],["毎日少しはつながっていたい",[0,1,1,-1]],["内容が良ければ頻度は問わない",[0,0,0,1]],["必要なときだけで十分",[-1,-1,0,2]]
+  ]},
+  {q:"相手との意見がぶつかったときは？", a:[
+    ["その場ですぐ話し合う",[2,1,0,0]],["少し落ち着いてから話す",[-1,0,2,1]],["相手の気持ちを優先する",[0,1,1,-1]],["いったん距離を置いて整理する",[-2,-1,0,2]]
+  ]},
+  {q:"惹かれやすい相手は？", a:[
+    ["情熱的で分かりやすい人",[1,1,-2,0]],["穏やかで誠実な人",[0,0,2,0]],["知的で自分の世界を持つ人",[-1,0,0,2]],["少し謎があって刺激的な人",[1,-1,-2,1]]
+  ]},
+  {q:"恋人や大切な人に秘密がありそうだと感じたら？", a:[
+    ["直接聞く",[2,1,0,0]],["様子を見ながら確かめる",[0,0,1,0]],["信じて待つ",[-1,0,2,1]],["自分の中で考えすぎてしまう",[-1,-1,0,-1]]
+  ]},
+  {q:"大切な人と過ごす休日は？", a:[
+    ["予定をたくさん詰めたい",[1,1,-2,-1]],["家や近場でゆっくりしたい",[0,0,2,0]],["一緒でも別々のことをしたい",[-1,0,1,2]],["その日の気分で決めたい",[1,0,-1,1]]
+  ]},
+  {q:"嫉妬したときのあなたに近いのは？", a:[
+    ["素直に伝える",[2,1,0,0]],["少し態度に出る",[1,0,-1,-1]],["表に出さず自分で整理する",[-1,-1,1,1]],["基本的にあまり嫉妬しない",[-1,0,1,2]]
+  ]},
+  {q:"長く続く関係に必要だと思うものは？", a:[
+    ["好きという熱量",[1,2,-1,0]],["信頼と安心",[0,0,2,0]],["会話と理解",[1,1,1,0]],["それぞれの自由",[-1,-1,0,2]]
+  ]},
+  {q:"別れや距離を感じたときは？", a:[
+    ["取り戻すために動く",[2,1,-1,0]],["理由をきちんと知りたい",[1,0,1,0]],["時間をかけて受け入れる",[-1,-1,2,1]],["自分の生活に意識を戻す",[-1,-1,0,2]]
+  ]},
+  {q:"あなたにとって『愛されている』と感じる瞬間は？", a:[
+    ["言葉で気持ちを伝えられたとき",[0,2,0,0]],["行動で大切にされたとき",[0,0,2,0]],["必要とされたとき",[1,1,0,-2]],["自由な自分を尊重されたとき",[-1,-1,0,2]]
+  ]}
+];
+
+const types = [
+  {name:"Moon Harbor",icon:"🌙",sub:"静けさの中で、深い愛情を育てる人",desc:"あなたは、急いで距離を縮めるより、安心できる時間を重ねながら心を開くタイプです。表面は落ち着いて見えても、内側には長く消えない愛情があります。"},
+  {name:"Solar Bloom",icon:"☀️",sub:"愛情をまっすぐ届ける、陽だまりの人",desc:"あなたは好意を温かく表現し、相手の心を明るくするタイプです。関係を前へ進める力があり、迷っている相手にも安心を与えます。"},
+  {name:"Velvet Flame",icon:"🔥",sub:"静かな色気と情熱を秘めた人",desc:"あなたは感情をすべて見せるわけではありませんが、心が決まると強く深く惹かれます。穏やかさと刺激を両方求める複雑さが魅力です。"},
+  {name:"Crystal Compass",icon:"🧭",sub:"自分の軸で、関係の方向を選ぶ人",desc:"あなたは恋愛だけに飲み込まれず、自分らしさを保ったまま相手と向き合います。依存ではなく、選び続けることで愛を育てるタイプです。"},
+  {name:"Golden Anchor",icon:"⚓",sub:"揺れない安心をつくる、誠実な人",desc:"あなたは派手さより信頼を大切にし、相手に安定した居場所を与えます。小さな約束や日常の積み重ねに愛情を込めるタイプです。"},
+  {name:"Aurora Pulse",icon:"🌌",sub:"予測できない輝きで、人を惹きつける人",desc:"あなたは感覚が鋭く、恋愛に新鮮さや心の動きを求めます。型にはまらない関係を楽しみ、相手の知らない世界を開くタイプです。"},
+  {name:"Gentle Orbit",icon:"🪐",sub:"近すぎず遠すぎず、心地よく寄り添う人",desc:"あなたは相手の自由を尊重しながら、必要なときには確かにそばにいます。距離感を整える力に優れ、長く続く関係を作れます。"},
+  {name:"Rose Signal",icon:"🌹",sub:"気持ちを読み取り、愛を返す共感の人",desc:"あなたは相手の小さな変化によく気づき、求められている愛情を返すタイプです。共感力が高い一方、自分の本音を後回しにしやすい面もあります。"}
+];
+
+const sections = [
+  ["あなたに最適な相手は","あなたのペースを尊重しながら、気持ちは曖昧にせず伝えてくれる人です。急かさず、放置もしない。その絶妙な距離を保てる相手といると、あなたの魅力は最も自然に表れます。"],
+  ["あなたが相手に求めているのは","強い刺激だけではなく、「ここでは無理をしなくていい」と思える安心です。会話が途切れても苦しくなく、本音を出しても関係が壊れないことを、心の奥で求めています。"],
+  ["恋をしたときのあなた","最初は相手をよく観察します。しかし信頼できると感じた瞬間から、気持ちは急に深くなります。周囲には冷静に見えても、頭の中では何度も相手との未来を想像しているでしょう。"],
+  ["あなたが無意識にしている恋愛のクセ","相手の気持ちを考えすぎて、自分の希望を後回しにすることがあります。優しさは長所ですが、本音を隠し続けると、相手には『何を考えているか分からない』と映ることもあります。"],
+  ["本当は傷つきやすい部分","雑な言葉や、曖昧な態度に弱いところがあります。表面では平気そうに振る舞えても、信頼していた相手から軽く扱われた感覚は、長く心に残りやすいでしょう。"],
+  ["LINE・連絡の特徴","返信速度そのものより、言葉の温度や内容を見ています。短くても気持ちが伝わる文章には安心しますが、事務的な返事が続くと、少しずつ心の距離を取る傾向があります。"],
+  ["ケンカしたとき","その場で感情をぶつけるより、いったん整理してから話したいタイプです。ただし黙り込みすぎると、相手には拒絶と受け取られるため、『少し考える時間がほしい』と先に伝えることが大切です。"],
+  ["長く付き合うと","関係が安定するほど、あなたのユーモアや甘え方が見えてきます。最初の印象よりずっと愛情深く、相手の日常を細かく覚えて支える、頼れる存在になります。"],
+  ["別れたあと","切り替えが早いように見えて、実際には静かに長く振り返ります。ただ、納得できる答えを見つけたあとは、同じ痛みを繰り返さないように自分を更新できる人です。"],
+  ["あなたへのメッセージ","愛されるために、分かりやすい誰かになる必要はありません。ただし、あなたの優しさは伝えなければ見えないこともあります。少しだけ言葉にすることで、関係は想像以上に近づきます。"]
+];
+
+const relationships = [
+  ["friend","友達"],["best","親友"],["crush","片思いしている人"],["mutual","両思いの人"],
+  ["maybe","私を思っているかもしれない人"],["partner","恋人・パートナー"],["family","家族"],["work","学校・職場の人"]
+];
+
+let current=0;
+let scores=[0,0,0,0];
+let result=null;
+let selectedRelation="friend";
+let selectedRelationOnly="friend";
+
+function startQuiz(){
+  hideAll();
+  document.getElementById("quizScreen").classList.remove("hidden");
+  current=0;scores=[0,0,0,0];showQuestion();
+}
+function hideAll(){
+  ["startScreen","quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+}
+function showQuestion(){
+  const item=questions[current];
+  document.getElementById("qCount").textContent=`QUESTION ${current+1} / ${questions.length}`;
+  document.getElementById("progress").style.width=`${(current/questions.length)*100}%`;
+  document.getElementById("question").textContent=item.q;
+  const box=document.getElementById("answers");box.innerHTML="";
+  item.a.forEach(([text,vals])=>{
+    const b=document.createElement("button");b.className="answer";b.textContent=text;
+    b.onclick=()=>selectAnswer(vals);box.appendChild(b);
+  });
+}
+function selectAnswer(vals){
+  vals.forEach((v,i)=>scores[i]+=v);
+  current++;
+  if(current<questions.length)showQuestion();
+  else{
+    document.getElementById("progress").style.width="100%";
+    hideAll();document.getElementById("loadingScreen").classList.remove("hidden");
+    setTimeout(showResult,1400);
+  }
+}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function normalized(v){return clamp(Math.round(50+v*4),8,96)}
+function chooseType(vals){
+  const [approach,expression,stability,independence]=vals;
+  if(stability>=6 && approach<=0) return 0;
+  if(approach>=5 && expression>=4) return 1;
+  if(approach>=2 && stability<=0) return 2;
+  if(independence>=6 && approach<=1) return 3;
+  if(stability>=6 && independence<4) return 4;
+  if(stability<=-3 && independence>=2) return 5;
+  if(independence>=5) return 6;
+  return 7;
+}
+function makeCode(typeIndex,vals){
+  const letters=vals.map(v=>String.fromCharCode(75+clamp(v,-10,10))).join("");
+  const seed=(typeIndex+1)*137+vals.reduce((a,b,i)=>a+(b+10)*(i+3),0);
+  return `LSM-${letters}-${String(seed%10000).padStart(4,"0")}`;
+}
+function decodeCode(code){
+  const m=(code||"").toUpperCase().trim().match(/^LSM-([A-U]{4})-(\d{4})$/);
+  if(!m)return null;
+  const vals=[...m[1]].map(c=>c.charCodeAt(0)-75);
+  const idx=chooseType(vals);
+  return {vals,typeIndex:idx,type:types[idx],code:`LSM-${m[1]}-${m[2]}`};
+}
+function showResult(){
+  const idx=chooseType(scores), t=types[idx];
+  result={scores:[...scores],typeIndex:idx,type:t,code:makeCode(idx,scores)};
+  hideAll();document.getElementById("resultScreen").classList.remove("hidden");
+  document.getElementById("typeIcon").textContent=t.icon;
+  document.getElementById("typeName").textContent=t.name;
+  document.getElementById("typeSub").textContent=t.sub;
+  document.getElementById("lsmCode").textContent=result.code;
+
+  const labels=["距離を縮める力","愛情表現","安心を求める度","自立性"];
+  const values=scores.map(normalized);
+  document.getElementById("stats").innerHTML=labels.map((l,i)=>`
+    <div class="stat"><div class="stat-top"><span>${l}</span><strong>${values[i]}%</strong></div>
+    <div class="bar"><span style="width:${values[i]}%"></span></div></div>`).join("");
+
+  document.getElementById("longResult").innerHTML=
+    `<div class="section"><h2>あなたの恋愛スタイル</h2><p>${t.desc}</p></div>`+
+    sections.map((s,i)=>`<div class="section"><h2>${s[0]}</h2><p>${personalize(s[1],i)}</p>
+    ${i===1||i===5||i===6?`<div class="tip">💡 ワンポイント：${tipFor(i)}</div>`:""}</div>`).join("");
+
+  renderRelations("relations",false);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function personalize(text,i){
+  const highIndependent=scores[3]>3, highStable=scores[2]>3, highExpress=scores[1]>3;
+  if(i===0 && highIndependent)return "自分の世界を持ち、あなたの自由も尊重できる人です。束縛せず、それでも必要な瞬間には迷わず手を差し伸べる相手と、最も長く自然な関係を築けます。";
+  if(i===1 && highExpress)return "気持ちを曖昧にせず、言葉と行動の両方で愛情を返してくれることです。あなたは一方通行の熱量ではなく、互いに届いている実感を求めています。";
+  if(i===7 && highStable)return "時間が経つほど信頼が深まり、相手にとって『帰ってこられる場所』になります。派手ではなくても、日常を支える愛情を長く保てる人です。";
+  return text;
+}
+function tipFor(i){
+  return {
+    1:"相手に期待することを、要求ではなく『私はこうされると嬉しい』という形で伝えると関係が深まります。",
+    5:"返信の速さだけで結論を出さず、会ったときの態度や継続的な行動も合わせて見てください。",
+    6:"考える時間が必要なときは、無言で離れるのではなく、戻って話す時刻まで伝えると安心感が生まれます。"
+  }[i];
+}
+function renderRelations(id,only){
+  const el=document.getElementById(id);
+  el.innerHTML="";
+  relationships.forEach(([key,label])=>{
+    const b=document.createElement("button");
+    b.className="relation-btn"+((only?selectedRelationOnly:selectedRelation)===key?" active":"");
+    b.textContent=label;
+    b.onclick=()=>{
+      if(only)selectedRelationOnly=key;else selectedRelation=key;
+      renderRelations(id,only);
+    };
+    el.appendChild(b);
+  });
+}
+function relationLabel(key){return relationships.find(x=>x[0]===key)?.[1]||"相手"}
+function compatibilityData(a,b,relation){
+  const diff=a.map((v,i)=>Math.abs(v-b[i]));
+  let base=92-diff.reduce((x,y)=>x+y,0)*3;
+  if(relation==="crush"||relation==="maybe")base+=3;
+  if(relation==="work")base=88-(diff[0]+diff[3])*4;
+  const score=clamp(Math.round(base),38,96);
+  const close=diff[0]<=3, expressive=diff[1]<=3, stable=diff[2]<=3, independent=diff[3]<=3;
+  let headline,body,advice;
+  if(relation==="friend"){
+    headline=score>=75?"自然体でいられる友達":"違いが刺激になる友達";
+    body=close?"会話のテンポと距離感が近く、無理に合わせなくても関係が続きやすい組み合わせです。":"距離の取り方は異なりますが、その違いが新しい視点を与えます。";
+    advice="連絡頻度を相手基準だけで判断せず、会ったときの心地よさを大切にしてください。";
+  }else if(relation==="best"){
+    headline=score>=75?"弱さまで預けられる親友":"補い合って強くなる親友";
+    body=stable?"安心の作り方が似ており、長い沈黙さえ心地よく感じやすい二人です。":"考え方は違っても、困ったときに互いの不足を補える関係です。";
+    advice="分かってくれるはず、で終わらせず、感謝を言葉にすると絆が長続きします。";
+  }else if(relation==="crush"){
+    headline=score>=75?"静かに近づけば、強く惹かれ合う可能性":"ペースを合わせるほど近づける可能性";
+    body=expressive?"愛情の伝え方が近いため、好意が届きやすい組み合わせです。":"好意の表現方法が違うため、相手のサインを見落とさないことが重要です。";
+    advice=close?"少しだけ分かりやすく好意を示すと、関係が前に進みやすくなります。":"急いで答えを求めず、共通の時間を増やしてください。";
+  }else if(relation==="mutual"||relation==="partner"){
+    headline=score>=75?"長く育てられる強い結びつき":"違いを理解すると深まる結びつき";
+    body=stable&&independent?"安心と自由の両方を保ちやすく、長期的な関係に向いた組み合わせです。":"求める距離や安心の形に差がありますが、言葉にできれば弱点が魅力へ変わります。";
+    advice="相手を変えるより、二人だけのルールを作ることが関係を安定させます。";
+  }else if(relation==="maybe"){
+    headline="相手の関心が育っている可能性";
+    body=expressive?"相手の愛情表現を受け取りやすい組み合わせです。小さな特別扱いが続いているなら、関心のサインかもしれません。":"好意の出し方が違うため、分かりやすいサインだけでは判断しにくい二人です。";
+    advice="診断だけで相手の気持ちは断定できません。会話や行動を丁寧に確かめてください。";
+  }else if(relation==="family"){
+    headline=score>=75?"言葉が少なくても支え合える関係":"違いを知るほど優しくなれる関係";
+    body=stable?"安心の感じ方が似ており、生活の中で自然に支え合えます。":"大切にするものが違うため、善意がすれ違いやすい組み合わせです。";
+    advice="正しさより『どう受け取ったか』を話すと、関係が柔らかくなります。";
+  }else{
+    headline=score>=75?"協力すると成果が出やすい関係":"役割を分けると強い関係";
+    body=independent?"互いのやり方を尊重しやすく、必要以上に干渉せず協力できます。":"進め方に違いがありますが、役割を明確にすると力を発揮します。";
+    advice="感情ではなく、期限・目的・役割を言葉にすると摩擦を減らせます。";
+  }
+  return {score,headline,body,advice};
+}
+function analyzeCompatibility(){
+  if(!result)return;
+  const partner=decodeCode(document.getElementById("partnerCode").value);
+  const out=document.getElementById("compatResult");
+  if(!partner){out.classList.remove("hidden");out.innerHTML="<strong>コードを確認してください。</strong><p class='small'>LSM-ABCD-1234 の形式で入力します。</p>";return}
+  showCompatibility(out,result.scores,partner,selectedRelation);
+}
+function showCompatibility(out,myVals,partner,relation){
+  const d=compatibilityData(myVals,partner.vals,relation);
+  out.classList.remove("hidden");
+  out.innerHTML=`<div class="score-ring" style="--score:${d.score*3.6}deg"><strong>${d.score}%</strong></div>
+  <div class="kicker" style="text-align:center">${relationLabel(relation)}としての相性</div>
+  <h2 style="text-align:center">${d.headline}</h2>
+  <p>${d.body}</p>
+  <div class="tip">💡 関係を深める鍵：${d.advice}</div>
+  <p class="small" style="margin-top:14px">相手のタイプ：${partner.type.icon} ${partner.type.name}</p>`;
+}
+function showCompatibilityOnly(){
+  hideAll();document.getElementById("compatOnly").classList.remove("hidden");
+  renderRelations("relationsOnly",true);
+}
+function analyzeCompatibilityOnly(){
+  const mine=decodeCode(document.getElementById("myCodeOnly").value);
+  const partner=decodeCode(document.getElementById("partnerCodeOnly").value);
+  const out=document.getElementById("compatResultOnly");
+  if(!mine||!partner){out.classList.remove("hidden");out.innerHTML="<strong>どちらかのコードを確認してください。</strong><p class='small'>LSM-ABCD-1234 の形式で入力します。</p>";return}
+  showCompatibility(out,mine.vals,partner,selectedRelationOnly);
+}
+function copyCode(){
+  navigator.clipboard?.writeText(result.code).then(()=>alert("LSM CODEをコピーしました")).catch(()=>prompt("このコードをコピーしてください",result.code));
+}
+function shareResult(){
+  if(!result)return;
+  const text=`私は「${result.type.icon} ${result.type.name}」でした。\n${result.type.sub}\n\nLove Style Mapで診断してみて。`;
+  if(navigator.share) navigator.share({title:"Love Style Map",text,url:location.href}).catch(()=>{});
+  else navigator.clipboard?.writeText(text+"\n"+location.href).then(()=>alert("シェア文をコピーしました"));
+}
+function saveResultImage(){
+  if(!result)return;
+  const overlay=document.getElementById("adOverlay"),count=document.getElementById("adCount");
+  overlay.classList.remove("hidden");let n=3;count.textContent=`${n}秒後に画像を作成します`;
+  const timer=setInterval(()=>{n--;count.textContent=n>0?`${n}秒後に画像を作成します`:"画像を作成しています…";if(n<=0){clearInterval(timer);setTimeout(()=>{overlay.classList.add("hidden");createResultImage()},500)}},1000);
+}
+function createResultImage(){
+  const c=document.createElement("canvas");c.width=1080;c.height=1350;
+  const x=c.getContext("2d");
+  const g=x.createLinearGradient(0,0,1080,1350);g.addColorStop(0,"#0b0b0e");g.addColorStop(.55,"#19181d");g.addColorStop(1,"#0b0b0e");
+  x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+  x.strokeStyle="#d8b77a";x.lineWidth=3;x.strokeRect(56,56,968,1238);
+  x.textAlign="center";x.fillStyle="#d8b77a";x.font="700 34px sans-serif";x.fillText("LOVE STYLE MAP",540,145);
+  x.fillStyle="#f8f3eb";x.font="94px sans-serif";x.fillText(result.type.icon,540,300);
+  x.fillStyle="#f0d8aa";x.font="700 78px sans-serif";x.fillText(result.type.name,540,410);
+  x.fillStyle="#ddd5ca";x.font="38px sans-serif";wrapText(x,result.type.sub,540,480,850,52);
+  const vals=scores.map(normalized),labels=["距離を縮める力","愛情表現","安心を求める度","自立性"];
+  let y=660;x.textAlign="left";
+  labels.forEach((l,i)=>{
+    x.fillStyle="#b7b0a8";x.font="30px sans-serif";x.fillText(l,150,y);
+    x.textAlign="right";x.fillStyle="#f0d8aa";x.font="700 32px sans-serif";x.fillText(vals[i]+"%",930,y);
+    x.fillStyle="#34343c";roundRect(x,150,y+20,780,18,9,true,false);
+    x.fillStyle="#d8b77a";roundRect(x,150,y+20,780*vals[i]/100,18,9,true,false);
+    x.textAlign="left";y+=120;
+  });
+  x.textAlign="center";x.fillStyle="#aaa39b";x.font="28px sans-serif";x.fillText("LSM CODE",540,1185);
+  x.fillStyle="#f0d8aa";x.font="700 42px monospace";x.fillText(result.code,540,1245);
+  const url=c.toDataURL("image/png");
+  const a=document.createElement("a");a.href=url;a.download=`love-style-map-${result.type.name.replace(/\s/g,"-")}.png`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>alert("画像が開いた場合は、画像を長押しして「写真に保存」を選んでください。"),400);
+}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+  let line="";const chars=[...text];
+  chars.forEach((ch,i)=>{const test=line+ch;if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=ch;y+=lineHeight}else line=test;if(i===chars.length-1)ctx.fillText(line,x,y)});
+}
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  if(w<2*r)r=w/2;if(h<2*r)r=h/2;
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+  if(fill)ctx.fill();if(stroke)ctx.stroke();
+}
+function restartAll(){
+  hideAll();document.getElementById("startScreen").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
