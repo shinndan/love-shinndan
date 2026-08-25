@@ -183,7 +183,7 @@ button{cursor:pointer}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="badge">CORE DIAGNOSIS 2.3</span>
+    <span class="badge">CORE DIAGNOSIS 2.4</span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -306,12 +306,9 @@ button{cursor:pointer}
         </div>
 
         <div id="aiQuestionArea" class="hidden" style="margin-top:16px">
-          <p class="small">気になる項目を選ぶか、相手との関係・起きていること・知りたいことを具体的に入力してください。詳しいほど回答精度が上がります。</p>
+          <p class="small">診断結果に合わせて選ばれた10項目から、気になる内容を選んでください。</p>
           <div class="relations" id="aiSuggestions"></div>
-          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px">
-            <input id="aiQuestionInput" class="compat-input" placeholder="例：片思いの人から2日返信がない。追いLINEしていい？">
-            <button class="secondary" onclick="askAIQuestion()">質問</button>
-          </div>
+          
           <div id="aiAnswer" class="compat-result hidden"></div>
         </div>
 
@@ -1023,28 +1020,199 @@ function answerPrecision(value){
 }
 
 
+
+const presetAITopics=[
+  {id:"ideal",label:"私に向いている相手",weight:p=>p.stability+p.loyalty*.5},
+  {id:"view",label:"恋人から見た私は？",weight:p=>p.warmth+p.expression*.6},
+  {id:"line",label:"LINEではどんなタイプ？",weight:p=>p.stability+p.jealousy*.7},
+  {id:"marriage",label:"結婚したらどうなる？",weight:p=>p.loyalty+p.stability},
+  {id:"breakup",label:"失恋しやすい理由",weight:p=>p.loyalty+p.jealousy},
+  {id:"long",label:"長続きするコツ",weight:p=>p.loyalty+p.stability+p.expression*.3},
+  {id:"weak",label:"恋愛で気をつけること",weight:p=>Math.max(p.jealousy,100-p.independence,100-p.expression)*1.2},
+  {id:"strong",label:"私の恋愛での強み",weight:p=>Math.max(p.warmth,p.loyalty,p.expression,p.independence)},
+  {id:"jealousy",label:"嫉妬するとどうなる？",weight:p=>p.jealousy*1.3},
+  {id:"distance",label:"心地よい距離感は？",weight:p=>p.independence+p.stability},
+  {id:"expression",label:"愛情表現はどんなタイプ？",weight:p=>p.expression+p.warmth*.5},
+  {id:"dependence",label:"恋愛で依存しやすい？",weight:p=>(100-p.independence)+p.jealousy*.5},
+  {id:"fight",label:"ケンカするとどうなる？",weight:p=>p.expression+p.jealousy},
+  {id:"crush",label:"片思いではどうなる？",weight:p=>p.approach+p.warmth*.4},
+  {id:"confession",label:"告白するならどう伝える？",weight:p=>p.approach+p.expression},
+  {id:"future",label:"将来の恋愛傾向は？",weight:p=>p.stability+p.loyalty+p.romanceIQ*.2}
+];
+
+function getPresetProfile(){
+  const m=result.metrics;
+  const v=m.values;
+  return {
+    approach:v[0],expression:v[1],stability:v[2],independence:v[3],
+    loyalty:m.loyalty,jealousy:m.jealousy,strategy:m.strategy,
+    warmth:m.warmth,romanceIQ:m.romanceIQ
+  };
+}
+
+function selectPresetTopics(){
+  const p=getPresetProfile();
+  const selected=[...presetAITopics].sort((a,b)=>b.weight(p)-a.weight(p)).slice(0,10);
+  const required=["ideal","view","line","long"];
+  required.forEach(id=>{
+    if(!selected.some(item=>item.id===id)){
+      const replacement=presetAITopics.find(item=>item.id===id);
+      selected[selected.length-1]=replacement;
+    }
+  });
+  return [...new Map(selected.map(item=>[item.id,item])).values()].slice(0,10);
+}
+
+function presetAnswer(id,p){
+  const high=(n)=>n>=70;
+  const low=(n)=>n<45;
+
+  if(id==="ideal"){
+    const partner=high(p.stability)
+      ?"態度や連絡に一貫性があり、安心を言葉と行動で示せる人"
+      :high(p.independence)
+        ?"自分の世界を持ちながら、必要なときにはきちんと向き合える人"
+        :"気持ちを曖昧にせず、話し合いから逃げない人";
+    return ["向いている相手",
+      `${userName}さんに合いやすいのは、${partner}です。性格が似ているかより、約束・連絡・話し合いに一貫性があるかが重要です。`,
+      "優しいだけでなく、困ったときに会話から逃げない相手かを見てください。"];
+  }
+
+  if(id==="view"){
+    return ["恋人から見た印象",
+      `恋人から見ると、${userName}さんは${high(p.warmth)?"愛情が伝わりやすく、一緒にいると安心しやすい人":"落ち着いていて、簡単には感情に流されない人"}に映りやすいです。${high(p.expression)?"好意は比較的伝わりやすいでしょう。":"大切に思っていても、相手には少し分かりにくいことがあります。"}`,
+      low(p.independence)?"相手に合わせすぎると、本音が見えにくくなる点には注意が必要です。":"落ち着いて見える分、弱さや寂しさも言葉にすると距離が縮まります。"];
+  }
+
+  if(id==="line"){
+    return ["LINE・連絡の傾向",
+      `${userName}さんは、${high(p.stability)?"返信の速さより、連絡の安定感や言葉の温度を重視する":"頻度より、会話が自然に続くかを重視する"}タイプです。${p.jealousy>=65?"返信が遅い状態が続くと、相手の気持ちまで変わったように感じやすい傾向があります。":"返信が遅くても、普段の態度に一貫性があれば待ちやすい傾向があります。"}`,
+      "即レスを求めるより、お互いの通常ペースを先に共有する方が安心につながります。"];
+  }
+
+  if(id==="marriage"){
+    return ["結婚後の傾向",
+      `結婚すると、${userName}さんは${p.loyalty>=75?"約束や日常を大切にし、家庭に安定を作ろうとする":"互いの自由を残しながら支え合う"}パートナーになりやすいでしょう。${low(p.independence)?"家事や気遣いを一人で背負い込みやすいため、役割を言葉にして分けることが大切です。":"一人の時間と二人の時間を先に相談できると、長く安定しやすいです。"}`,
+      "感情だけでなく、お金・生活時間・家事について話せる相手が向いています。"];
+  }
+
+  if(id==="breakup"){
+    return ["失恋で傷つきやすい理由",
+      `${userName}さんは、${p.loyalty>=75?"一度大切にした相手への気持ちを簡単には切り替えにくい":"別れそのものより、理由が分からない状態に心が残りやすい"}タイプです。${p.jealousy>=65?"相手の小さな変化を深読みしやすく、別れの前から不安を抱え込みやすい傾向もあります。":"状況を整理できれば、自分の生活へ戻る力も持っています。"}`,
+      "相手の本心を推測し続けるより、次の関係で譲れない条件を3つ書き出す方が回復につながります。"];
+  }
+
+  if(id==="long"){
+    return ["長続きさせるコツ",
+      `長続きの鍵は、${userName}さんが相手に合わせ続けることではなく、二人のルールを一緒に作ることです。${high(p.stability)?"連絡頻度・一人の時間・ケンカ後の戻り方を早めに話せる関係ほど安心しやすいです。":"刺激だけでなく、安心を作る習慣を持つことが重要です。"}`,
+      high(p.expression)?"伝える量より、相手が受け取りやすい言い方を意識してください。":"完璧な言葉より『私はこう感じた』と短く伝える方が効果的です。"];
+  }
+
+  if(id==="weak"){
+    let issue,point;
+    if(p.jealousy>=70){
+      issue="相手の反応を事実以上に深読みすること";
+      point="結論を出す前に、事実と想像を分けてください。";
+    }else if(low(p.independence)){
+      issue="相手を優先しすぎて、自分の希望を後回しにすること";
+      point="相手のための予定と、自分のための予定を同じくらい大切にしてください。";
+    }else if(low(p.expression)){
+      issue="本音を察してもらおうとして、言葉が不足すること";
+      point="短くてもよいので、希望を直接伝えることが大切です。";
+    }else{
+      issue="相手との違いを、関係の失敗だと考えすぎること";
+      point="違いがあることより、安全に話せるかを重視してください。";
+    }
+    return ["恋愛で気をつけたい点",`${userName}さんが特に気をつけたいのは、${issue}です。`,point];
+  }
+
+  if(id==="strong"){
+    let strength;
+    if(p.warmth>=Math.max(p.loyalty,p.independence,p.expression)) strength="相手に『大切にされている』と感じさせる温かさ";
+    else if(p.loyalty>=Math.max(p.independence,p.expression)) strength="一度築いた関係を丁寧に守ろうとする誠実さ";
+    else if(p.independence>=p.expression) strength="相手に依存せず、対等な関係を作れること";
+    else strength="好意や感謝を相手に届く形で表せること";
+    return ["恋愛での強み",`${userName}さんの恋愛での強みは、${strength}です。`,"相手だけでなく、自分にも同じ丁寧さを向けると強みがより活きます。"];
+  }
+
+  if(id==="jealousy"){
+    return ["嫉妬・不安の傾向",
+      `嫉妬しやすさは${p.jealousy}%で、${p.jealousy>=70?"大切な相手ほど小さな変化に敏感になりやすい":"状況が分からないときに不安が出やすい"}傾向です。`,
+      "嫉妬は愛情の証明ではなく、『安心するための情報が不足している』サインとして扱ってください。"];
+  }
+
+  if(id==="distance"){
+    return ["心地よい距離感",
+      `自立性は${p.independence}%です。${p.independence>=65?"会う時間と一人の時間にメリハリがある関係":"連絡や会う頻度が安定している関係"}の方が心地よく感じやすいです。`,
+      "理想の頻度に正解はありません。負担になる前に、お互いの希望を数字で話してください。"];
+  }
+
+  if(id==="expression"){
+    return ["愛情表現の特徴",
+      `${userName}さんは、${p.expression>=70?"好意や感謝を言葉や反応に出しやすい":p.expression>=45?"行動と必要な言葉を組み合わせる":"行動には出ても、言葉では控えめになりやすい"}タイプです。`,
+      "相手の受け取り方が違う場合は、『私は行動で示すことが多い』と伝えるだけでも誤解が減ります。"];
+  }
+
+  if(id==="dependence"){
+    return ["恋愛への依存傾向",
+      `自立性は${p.independence}%で、${low(p.independence)?"好きな人を優先し、自分の生活が相手中心になりやすい":"恋愛中も、自分の時間をある程度保ちやすい"}傾向です。`,
+      "依存かどうかは、好きの強さではなく、相手の反応で一日の気分がほぼ決まるかで見ると分かりやすいです。"];
+  }
+
+  if(id==="fight"){
+    return ["ケンカ・仲直りの傾向",
+      `ケンカでは、${high(p.expression)?"気持ちが強いまま言葉が増えやすい":"その場では黙り、あとから考え続けやすい"}可能性があります。${userName}さんには、落ち着いてから『何が嫌だったか』『次はどうしたいか』を分けて話す方法が向いています。`,
+      "勝ち負けではなく、次に同じことが起きたときのルールを決めてください。"];
+  }
+
+  if(id==="crush"){
+    return ["片思い中の傾向",
+      `片思いでは、${userName}さんは${p.approach>=65?"関係を進めるきっかけを作りやすい":"相手の反応を慎重に見すぎて、好意が伝わりにくい"}傾向があります。`,
+      "一度に大きく動くより、二人で話す時間を少し増やす方が自然です。"];
+  }
+
+  if(id==="confession"){
+    return ["告白するときの伝え方",
+      `${userName}さんは、${p.approach>=65?"気持ちが決まると自分から動きやすい":"相手の反応を確かめてから動きやすい"}タイプです。長い説明より『一緒にいる時間が好き』『もっと近い関係になりたい』と、気持ちと希望を分けて伝える方が自然です。`,
+      "相手の気持ちは断定できません。会話を続けようとするか、二人の時間を作ろうとするかを見てください。"];
+  }
+
+  return ["将来の恋愛傾向",
+    `診断から未来を予言することはできません。ただ、${userName}さんは${high(p.stability)?"安心できる基盤が整うほど、長い関係を現実的に考えやすい":"関係に成長や新鮮さを感じられるほど、将来を考えやすい"}タイプです。`,
+    "時期よりも、生活・お金・一人の時間について話せる相手かを重視してください。"];
+}
+
 function renderAISuggestions(){
-  const items=[
-    "私に向いている人",
-    "恋人から見た私は？",
-    "LINEではどんなタイプ？",
-    "結婚したらどうなる？",
-    "失恋しやすい理由",
-    "長続きするコツ"
-  ];
   const box=document.getElementById("aiSuggestions");
   box.innerHTML="";
-  items.forEach(text=>{
+  selectPresetTopics().forEach(item=>{
     const b=document.createElement("button");
     b.className="relation-btn";
-    b.textContent=text;
-    b.onclick=()=>{
-      document.getElementById("aiQuestionInput").value=text;
-      askAIQuestion();
-    };
+    b.textContent=item.label;
+    b.onclick=()=>showPresetAIAnswer(item.id);
     box.appendChild(b);
   });
 }
+
+function showPresetAIAnswer(id){
+  const p=getPresetProfile();
+  const [title,body,point]=presetAnswer(id,p);
+  const out=document.getElementById("aiAnswer");
+  out.classList.remove("hidden");
+  out.innerHTML=`
+    <div class="kicker">AI RESPONSE</div>
+    <h2 style="margin:8px 0 12px">${title}</h2>
+    <p>${body}</p>
+    <div class="tip" style="margin-top:16px">
+      <strong>今回のポイント</strong><br>${point}
+    </div>
+    <p class="small" style="margin-top:14px">
+      この回答は${userName}さんの診断結果に合わせて生成しています。
+      相手の本心や未来を断定するものではありません。
+    </p>`;
+  out.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
 
 
 
@@ -1347,39 +1515,6 @@ function buildHighPrecisionResponse(intent, ctx){
   return response;
 }
 
-function askAIQuestion(){
-  const input=document.getElementById("aiQuestionInput");
-  const q=normalizeJapanese(input.value);
-  if(!q)return;
-
-  const out=document.getElementById("aiAnswer");
-  out.classList.remove("hidden");
-  out.innerHTML=`<p>${userName}さんの診断結果と質問内容を照合しています…</p>`;
-
-  setTimeout(()=>{
-    const ctx=extractQuestionContext(q);
-    const intent=detectAIIntent(q,ctx);
-    const response=buildHighPrecisionResponse(intent,ctx);
-
-    out.innerHTML=`
-      <div class="kicker">AI RESPONSE</div>
-      <h2 style="margin:8px 0 12px">${response.title}</h2>
-      <p>${response.body}</p>
-      ${response.steps||""}
-      <div class="tip" style="margin-top:16px">
-        <strong>今回のポイント</strong><br>
-        ${response.point}
-      </div>
-      <div class="small" style="margin-top:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <span>質問理解度の目安：${response.confidence}%</span>
-        <span>診断データに基づく自己理解用分析</span>
-      </div>
-      <p class="small" style="margin-top:10px">
-        相手の本心や未来は断定できません。具体的な状況を加えるほど、回答は詳しくなります。
-      </p>
-    `;
-  },650);
-}
 
 
 function restartAll(){
