@@ -2718,6 +2718,14 @@ function playDiagnosisStartSound(){
     if(titleActivated)return;
     titleActivated=true;
     if(event)event.preventDefault();
+
+    // タイトルを閉じた直後は、必ず名前入力のトップ画面を表示する。
+    ["quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>{
+      document.getElementById(id)?.classList.add("hidden");
+    });
+    document.getElementById("startScreen")?.classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"auto"});
+
     playTitleEnterSound();
     requestAnimationFrame(()=>closeTitleScreen());
   }
