@@ -5,6 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#101013">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Love Style Map｜「好き」がわかれば、恋愛は変わる。</title>
 <meta name="description" content="恋愛を当てるのではなく、理解する。毎回変わる16の質問から、あなただけの恋愛マップを生成するLove Style Map。">
 <style>
@@ -692,11 +695,41 @@ button:active{transform:scale(.975)!important}
 
 /* v3.3 safety: pre-diagnosis compatibility-only screen is permanently disabled */
 #compatOnly,[data-screen="compat-only"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+
+/* BUILD 3.4: legacy pre-diagnosis compatibility screen is forbidden */
+#compatOnly, #compatibilityOnly, .compat-only, [data-screen="compat-only"], [data-view="compat-only"]{
+  display:none!important; visibility:hidden!important; pointer-events:none!important; height:0!important; overflow:hidden!important;
+}
+
 </style>
 </head>
 <body>
+<script>
+/* BUILD 3.4 boot guard: the title can only lead to the nickname start screen. */
+(function(){
+  function removeLegacyCompatibilityScreen(){
+    ["compatOnly","compatibilityOnly"].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el)el.remove();
+    });
+    document.querySelectorAll('.compat-only,[data-screen="compat-only"],[data-view="compat-only"]').forEach(function(el){el.remove();});
+  }
+  window.__LSM_SHOW_NAME_START__=function(){
+    removeLegacyCompatibilityScreen();
+    ["quizScreen","loadingScreen","resultScreen"].forEach(function(id){
+      var el=document.getElementById(id); if(el)el.classList.add("hidden");
+    });
+    var start=document.getElementById("startScreen");
+    if(start){ start.classList.remove("hidden"); start.style.display=""; }
+    window.scrollTo(0,0);
+  };
+  document.addEventListener("DOMContentLoaded",removeLegacyCompatibilityScreen,{once:true});
+  window.addEventListener("pageshow",removeLegacyCompatibilityScreen);
+})();
+</script>
 
-<!-- TITLE SCREEN VERIFIED v4: ENTER ALWAYS OPENS NAME INPUT -->
+
+<!-- TITLE SCREEN VERIFIED v5: NAME INPUT ONLY / BUILD 3.4 -->
 <div id="titleScreen" class="title-screen" aria-label="LOVE STYLE MAP タイトル画面" role="dialog" aria-modal="true">
   <div class="title-screen-inner">
     <div class="title-screen-kicker">YOUR RELATIONSHIP BLUEPRINT</div>
@@ -714,7 +747,7 @@ button:active{transform:scale(.975)!important}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 3.3</span></span>
+    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 3.4</span></span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -2694,18 +2727,13 @@ function playDiagnosisStartSound(){
   };
 
   function forceNameStartScreen(){
-    // 旧版の相性コード専用画面が残っていても、DOMから完全に除去する。
-    document.getElementById("compatOnly")?.remove();
-    document.querySelectorAll('[data-screen="compat-only"]').forEach(el=>el.remove());
-    // iPhone/Safariの画面復元（bfcache）も含め、ENTER後の表示先を必ず名前入力画面に固定する。
-    if(typeof hideAll==="function") hideAll();
-    else ["startScreen","quizScreen","loadingScreen","resultScreen"].forEach(id=>{
-      document.getElementById(id)?.classList.add("hidden");
-    });
-
+    if(typeof window.__LSM_SHOW_NAME_START__==="function"){
+      window.__LSM_SHOW_NAME_START__();
+      return;
+    }
+    ["quizScreen","loadingScreen","resultScreen"].forEach(id=>document.getElementById(id)?.classList.add("hidden"));
     const start=document.getElementById("startScreen");
     start?.classList.remove("hidden");
-    start?.removeAttribute("style");
     window.scrollTo({top:0,behavior:"auto"});
   }
 
@@ -2837,3 +2865,4 @@ function playDiagnosisStartSound(){
 
 </body>
 </html>
+<!-- LOVE STYLE MAP BUILD 3.4 / PRE-DIAGNOSIS COMPATIBILITY SCREEN REMOVED -->
