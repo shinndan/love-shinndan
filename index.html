@@ -784,7 +784,7 @@ button:active{transform:scale(.975)!important}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 4.2</span></span>
+    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 4.3</span></span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -2902,11 +2902,11 @@ function playDiagnosisStartSound(){
 
 
 <script>
-/* LOVE STYLE MAP 4.0 — split long result into guided pages */
+/* LOVE STYLE MAP 4.3 — split long result into guided pages */
 let resultPageIndex=0;
 const RESULT_PAGE_LABELS=[
   "恋愛タイプ","恋愛マップ","9つの数値","分析精度","基本プロフィール",
-  "診断まとめ","AI分析","AI個人レポート","相性分析","アンケート"
+  "診断まとめ","AI分析","AI個人レポート","保存・シェア","相性分析","アンケート"
 ];
 
 function makeResultSlide(index,label){
@@ -2959,7 +2959,7 @@ function setupResultPager(){
   const p0=makeResultPanel(); p0.append(head); slides[0].append(p0);
   const p1=makeResultPanel(); p1.append(map); slides[1].append(p1);
   const p2=makeResultPanel(); p2.append(makeResultPageTitle("YOUR NUMBERS","9つの恋愛傾向","回答から読み取れた特徴を、数値で確認できます。"),stats); slides[2].append(p2);
-  const p3=makeResultPanel(); p3.append(precision,actions,notice); slides[3].append(p3);
+  const p3=makeResultPanel(); p3.append(precision); slides[3].append(p3);
 
   const p4=makeResultPanel();
   p4.append(makeResultPageTitle("CORE PROFILE","あなたの恋愛プロフィール","文章を3つに分けて、読みやすく整理しました。"));
@@ -2978,9 +2978,13 @@ function setupResultPager(){
   const empty=document.createElement("div");empty.id="aiReportEmpty";empty.className="ai-report-empty";empty.textContent="前のページで「AI分析をもう一度見る」を押すと、個人レポートが作成されます。";
   p7.append(empty,aiAnalysis,precisionArea,aiQuestionArea);slides[7].append(p7);
 
-  slides[8].append(compat);
-  slides[9].append(survey);
-  if(restart)slides[9].append(restart);
+  const p8=makeResultPanel();
+  p8.append(makeResultPageTitle("SAVE & SHARE","結果を残す・共有する","診断結果を画像で保存したり、大切な人へ共有できます。"),actions,notice);
+  slides[8].append(p8);
+
+  slides[9].append(compat);
+  slides[10].append(survey);
+  if(restart)slides[10].append(restart);
 
   slides.forEach(slide=>host.append(slide));
   staging.id="resultLongStaging";
@@ -3059,128 +3063,132 @@ generateAIAnalysis=function(){
 </script>
 
 <style>
-/* LOVE STYLE MAP 4.2 — result icon / nine percentages restoration */
+/* LOVE STYLE MAP 4.3 — result illustration, number cards and action-page refinement */
 .result-slide[data-page="0"] .type-icon{
   display:grid!important;
+  place-items:center!important;
   visibility:visible!important;
   opacity:1!important;
-  min-height:108px;
+  width:132px!important;
+  height:132px!important;
+  min-height:132px!important;
+  margin:30px auto 22px!important;
+  color:var(--theme-soft)!important;
+  filter:drop-shadow(0 0 28px rgba(var(--theme-rgb),.42))!important;
 }
 .result-slide[data-page="0"] .type-icon svg{
   display:block!important;
   width:100%!important;
   height:100%!important;
-  overflow:visible;
+  overflow:visible!important;
+  color:var(--theme-soft)!important;
 }
 .result-slide[data-page="2"] .premium-stats .stat{
   min-height:196px;
+  justify-content:center;
 }
 .result-slide[data-page="2"] .stat-top{
   display:flex!important;
   flex-direction:column;
   align-items:center;
-  gap:10px;
-  min-height:54px;
+  justify-content:center;
+  gap:13px;
+  min-height:76px;
+  width:100%;
+  text-align:center;
+}
+.result-slide[data-page="2"] .stat-top span{
+  color:var(--theme-soft)!important;
+  font-size:clamp(16px,4vw,20px)!important;
+  line-height:1.45!important;
+  font-weight:800!important;
+  letter-spacing:.015em;
+  text-shadow:0 0 18px rgba(var(--theme-rgb),.16);
 }
 .result-slide[data-page="2"] .stat-top strong{
   display:block!important;
-  color:var(--theme-soft);
-  font-size:18px;
-  line-height:1;
+  color:var(--theme-soft)!important;
+  font-size:clamp(27px,6vw,34px)!important;
+  line-height:1!important;
 }
 .result-slide[data-page="2"] .stat-ring{
-  display:grid!important;
-  visibility:visible!important;
-  opacity:1!important;
+  display:none!important;
 }
-.result-slide[data-page="2"] .stat-ring b{
-  display:block!important;
-  color:var(--theme-soft);
+.result-slide[data-page="8"] .actions{
+  grid-template-columns:1fr 1fr;
+  margin-top:26px;
 }
+.result-slide[data-page="8"] .actions button{min-height:72px;font-size:17px}
 @media(max-width:620px){
+  .result-slide[data-page="0"] .type-icon{width:116px!important;height:116px!important;min-height:116px!important}
   .result-slide[data-page="2"] .premium-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .result-slide[data-page="2"] .premium-stats .stat:last-child:nth-child(odd){grid-column:1/-1;max-width:calc(50% - 6px)}
-  .result-slide[data-page="2"] .stat{min-height:182px;padding:16px 8px}
+  .result-slide[data-page="2"] .stat{min-height:178px;padding:18px 10px}
+  .result-slide[data-page="2"] .stat-top{min-height:112px;gap:18px}
+  .result-slide[data-page="8"] .actions{grid-template-columns:1fr 1fr}
 }
 </style>
 <script>
-/* BUILD 4.2 hardening: restore the type illustration and all nine percentages. */
+/* BUILD 4.3 hardening: always paint the type symbol and all nine values. */
 (function(){
-  function currentMetricValues(){
+  function metricValues(){
     if(!window.result || !result.metrics) return null;
     var m=result.metrics;
     return [
-      ...(m.values||[]),
-      m.romanceIQ,m.loyalty,m.jealousy,m.strategy,m.warmth
-    ].slice(0,9).map(function(v){ return Math.max(0,Math.min(100,Math.round(Number(v)||0))); });
+      ...(m.values||[]),m.romanceIQ,m.loyalty,m.jealousy,m.strategy,m.warmth
+    ].slice(0,9).map(function(v){return Math.max(0,Math.min(100,Math.round(Number(v)||0)));});
   }
 
-  function restoreTypeIllustration(){
+  function paintTypeIllustration(){
     var el=document.getElementById('typeIcon');
     if(!el || !window.result || !result.type) return;
+    var theme=null;
+    try{ theme=(typeof applyTypeTheme==='function')?applyTypeTheme(result.type):null; }catch(e){}
     try{
-      var theme=(typeof applyTypeTheme==='function')?applyTypeTheme(result.type):null;
       if(theme && typeof iconSVG==='function'){
-        el.innerHTML=iconSVG(theme.group);
+        /* Explicit stroke color avoids currentColor/Safari inheritance failures. */
+        el.innerHTML=iconSVG(theme.group,theme.soft||theme.main||'#f4d996');
       }else{
         el.textContent=result.type.icon||'✦';
       }
-    }catch(e){
-      el.textContent=result.type.icon||'✦';
-    }
+    }catch(e){ el.textContent=result.type.icon||'✦'; }
     el.style.display='grid';
     el.style.visibility='visible';
     el.style.opacity='1';
   }
 
-  function restoreNinePercentages(){
+  function paintNineValues(){
     var host=document.getElementById('stats');
-    var values=currentMetricValues();
+    var values=metricValues();
     if(!host || !values || values.length<9) return;
     var labels=['距離を縮める力','愛情表現','安心を求める度','自立性','恋愛偏差値','一途度','嫉妬しやすさ','駆け引き度','恋愛体温'];
     host.innerHTML=labels.map(function(label,i){
-      var value=values[i];
-      return '<div class="stat">'+
-        '<div class="stat-top"><span>'+label+'</span><strong>'+value+'%</strong></div>'+
-        '<div class="stat-ring" style="--value:'+value+'"><b>'+value+'%</b></div>'+
-      '</div>';
+      return '<div class="stat"><div class="stat-top"><span>'+label+'</span><strong>'+values[i]+'%</strong></div></div>';
     }).join('');
   }
 
-  function restoreResultVisuals(){
-    restoreTypeIllustration();
-    restoreNinePercentages();
-  }
+  function restore(){ paintTypeIllustration(); paintNineValues(); }
 
-  var previousShowResult=window.showResult;
-  if(typeof previousShowResult==='function'){
+  var oldShowResult=window.showResult;
+  if(typeof oldShowResult==='function'){
     window.showResult=function(){
-      previousShowResult.apply(this,arguments);
-      restoreResultVisuals();
-      requestAnimationFrame(restoreResultVisuals);
-      setTimeout(restoreResultVisuals,120);
-      setTimeout(restoreResultVisuals,700);
+      oldShowResult.apply(this,arguments);
+      restore(); requestAnimationFrame(restore); setTimeout(restore,100); setTimeout(restore,650);
     };
   }
-
-  var previousShowResultPage=window.showResultPage;
-  if(typeof previousShowResultPage==='function'){
+  var oldShowResultPage=window.showResultPage;
+  if(typeof oldShowResultPage==='function'){
     window.showResultPage=function(index,scroll){
-      previousShowResultPage.apply(this,arguments);
-      if(index===0 || index===2 || index==null){
-        requestAnimationFrame(restoreResultVisuals);
-        setTimeout(restoreResultVisuals,80);
-      }
+      oldShowResultPage.apply(this,arguments);
+      if(index===0 || index===2 || index==null){requestAnimationFrame(restore);setTimeout(restore,80);}
     };
   }
-
   document.addEventListener('DOMContentLoaded',function(){
-    var badge=document.querySelector('.badge');
-    if(badge) badge.textContent='LOVE STYLE MAP 4.2';
+    var badge=document.querySelector('.badge'); if(badge)badge.textContent='LOVE STYLE MAP 4.3';
   });
 })();
 </script>
 
 </body>
 </html>
-<!-- LOVE STYLE MAP BUILD 4.2 / ICON AND NINE-PERCENTAGES RESTORED -->
+<!-- LOVE STYLE MAP BUILD 4.3 / SYMBOL, GOLD LABELS, ACTION PAGE -->
