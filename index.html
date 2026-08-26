@@ -689,11 +689,14 @@ button:active{transform:scale(.975)!important}
 .survey-share{margin-top:14px}
 @media(max-width:520px){.survey-options{grid-template-columns:1fr}.survey-field{padding:15px}.survey-choice label{font-size:13px}.survey-rating{gap:6px}}
 
+
+/* v3.3 safety: pre-diagnosis compatibility-only screen is permanently disabled */
+#compatOnly,[data-screen="compat-only"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
 </head>
 <body>
 
-<!-- TITLE SCREEN VERIFIED v3: ENTER ALWAYS OPENS NAME INPUT -->
+<!-- TITLE SCREEN VERIFIED v4: ENTER ALWAYS OPENS NAME INPUT -->
 <div id="titleScreen" class="title-screen" aria-label="LOVE STYLE MAP タイトル画面" role="dialog" aria-modal="true">
   <div class="title-screen-inner">
     <div class="title-screen-kicker">YOUR RELATIONSHIP BLUEPRINT</div>
@@ -711,7 +714,7 @@ button:active{transform:scale(.975)!important}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 3.2</span></span>
+    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 3.3</span></span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -1257,13 +1260,6 @@ function showCompatibility(out,myVals,partner,relation){
   <p class="small" style="margin-top:14px">相手のタイプ：${partner.type.icon} ${partner.type.name}</p>`;
 }
 
-function analyzeCompatibilityOnly(){
-  const mine=decodeCode(document.getElementById("myCodeOnly").value);
-  const partner=decodeCode(document.getElementById("partnerCodeOnly").value);
-  const out=document.getElementById("compatResultOnly");
-  if(!mine||!partner){out.classList.remove("hidden");out.innerHTML="<strong>どちらかのコードを確認してください。</strong><p class='small'>LSM-ABCD-1234 の形式で入力します。</p>";return}
-  showCompatibility(out,mine.vals,partner,selectedRelationOnly);
-}
 function copyCode(){
   navigator.clipboard?.writeText(result.code).then(()=>alert("相性コードをコピーしました。相手に送って、二人の相性分析に使えます。")).catch(()=>prompt("このコードをコピーしてください",result.code));
 }
@@ -2698,6 +2694,9 @@ function playDiagnosisStartSound(){
   };
 
   function forceNameStartScreen(){
+    // 旧版の相性コード専用画面が残っていても、DOMから完全に除去する。
+    document.getElementById("compatOnly")?.remove();
+    document.querySelectorAll('[data-screen="compat-only"]').forEach(el=>el.remove());
     // iPhone/Safariの画面復元（bfcache）も含め、ENTER後の表示先を必ず名前入力画面に固定する。
     if(typeof hideAll==="function") hideAll();
     else ["startScreen","quizScreen","loadingScreen","resultScreen"].forEach(id=>{
