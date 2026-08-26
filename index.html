@@ -693,7 +693,7 @@ button:active{transform:scale(.975)!important}
 </head>
 <body>
 
-<!-- TITLE SCREEN VERIFIED v2 -->
+<!-- TITLE SCREEN VERIFIED v3: ENTER ALWAYS OPENS NAME INPUT -->
 <div id="titleScreen" class="title-screen" aria-label="LOVE STYLE MAP タイトル画面" role="dialog" aria-modal="true">
   <div class="title-screen-inner">
     <div class="title-screen-kicker">YOUR RELATIONSHIP BLUEPRINT</div>
@@ -2714,18 +2714,28 @@ function playDiagnosisStartSound(){
     setTimeout(()=>screen.remove(),950);
   };
 
+  function forceNameStartScreen(){
+    // iPhone/Safariの画面復元（bfcache）も含め、ENTER後の表示先を必ず名前入力画面に固定する。
+    if(typeof hideAll==="function") hideAll();
+    else ["startScreen","quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>{
+      document.getElementById(id)?.classList.add("hidden");
+    });
+
+    const start=document.getElementById("startScreen");
+    const compat=document.getElementById("compatOnly");
+    start?.classList.remove("hidden");
+    start?.removeAttribute("style");
+    compat?.classList.add("hidden");
+    if(compat) compat.style.display="";
+    window.scrollTo({top:0,behavior:"auto"});
+  }
+
   function activateTitle(event){
     if(titleActivated)return;
     titleActivated=true;
     if(event)event.preventDefault();
 
-    // タイトルを閉じた直後は、必ず名前入力のトップ画面を表示する。
-    ["quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>{
-      document.getElementById(id)?.classList.add("hidden");
-    });
-    document.getElementById("startScreen")?.classList.remove("hidden");
-    window.scrollTo({top:0,behavior:"auto"});
-
+    forceNameStartScreen();
     playTitleEnterSound();
     requestAnimationFrame(()=>closeTitleScreen());
   }
@@ -2746,11 +2756,21 @@ function playDiagnosisStartSound(){
       }
     });
   }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',initTitleScreen,{once:true});
-  }else{
+  function bootTitleScreen(){
+    // タイトル表示中に背面で相性コード画面が復元されないよう、初期状態も固定する。
+    forceNameStartScreen();
     initTitleScreen();
   }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bootTitleScreen,{once:true});
+  }else{
+    bootTitleScreen();
+  }
+
+  window.addEventListener('pageshow',function(){
+    if(document.getElementById('titleScreen')) forceNameStartScreen();
+  });
 })();
 </script>
 
