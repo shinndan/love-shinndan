@@ -658,6 +658,37 @@ button:active{transform:scale(.975)!important}
   .title-divider{animation:none;width:min(62%,290px)}
 }
 
+
+/* AI広告・生成演出 */
+.ad-generation{margin-top:14px;padding:14px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid var(--line);text-align:left}
+.ad-generation-title{font-size:13px;color:var(--theme-soft);font-weight:800;letter-spacing:.06em;margin-bottom:9px}
+.ad-generation-bar{height:5px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.ad-generation-bar span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--theme),var(--theme-soft));box-shadow:0 0 16px rgba(var(--theme-rgb),.35);transition:width .45s ease}
+.ad-generation-step{margin-top:9px;color:var(--muted);font-size:12px;min-height:1.8em}
+
+
+
+/* LOVE STYLE MAP — β feedback survey */
+.survey-panel{margin-top:24px;border-color:rgba(var(--theme-rgb),.38);background:linear-gradient(145deg,rgba(var(--theme-rgb),.08),rgba(17,18,24,.98))}
+.survey-intro{text-align:center;max-width:580px;margin:0 auto 24px}
+.survey-form{display:grid;gap:22px}
+.survey-field{padding:18px;border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.022)}
+.survey-label{display:block;margin-bottom:12px;color:#f7f1e8;font-weight:800;line-height:1.55}
+.survey-required{margin-left:6px;color:var(--theme-soft);font-size:11px;letter-spacing:.08em}
+.survey-rating{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.survey-choice{position:relative}
+.survey-choice input{position:absolute;opacity:0;pointer-events:none}
+.survey-choice label{display:grid;place-items:center;min-height:52px;padding:9px 6px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025);color:var(--muted);font-weight:800;cursor:pointer;transition:.2s ease}
+.survey-choice input:checked+label{border-color:var(--theme);background:rgba(var(--theme-rgb),.13);color:var(--theme-soft);box-shadow:0 0 22px rgba(var(--theme-rgb),.12)}
+.survey-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.survey-textarea{width:100%;min-height:120px;resize:vertical;background:rgba(4,5,8,.62);color:var(--text);border:1px solid var(--line);border-radius:15px;padding:14px 15px;font:inherit;line-height:1.7}
+.survey-textarea:focus{border-color:var(--theme);outline:none}
+.survey-error{color:#f0a7a7;font-size:13px;text-align:center;margin:0}
+.survey-thanks{text-align:center;padding:32px 12px}
+.survey-thanks-mark{font-size:42px;color:var(--theme-soft);margin-bottom:8px}
+.survey-share{margin-top:14px}
+@media(max-width:520px){.survey-options{grid-template-columns:1fr}.survey-field{padding:15px}.survey-choice label{font-size:13px}.survey-rating{gap:6px}}
+
 </style>
 </head>
 <body>
@@ -672,7 +703,7 @@ button:active{transform:scale(.975)!important}
       <span class="title-word title-map"><em>MAP</em></span>
     </div>
     <div class="title-divider"></div>
-    <button id="titleEnter" class="title-enter" type="button" onclick="closeTitleScreen()">ENTER</button>
+    <button id="titleEnter" class="title-enter" type="button">ENTER</button>
     <div class="title-enter-note">ENTERをタップして診断を始める</div>
   </div>
 </div>
@@ -779,7 +810,7 @@ button:active{transform:scale(.975)!important}
         <button class="primary" onclick="saveResultImage()">画像を保存</button>
         <button class="primary gold-action" onclick="shareResult()">シェアする</button>
       </div>
-      <div class="notice">「画像を保存」では、収益化後の動きを再現するため短い広告デモが表示されます。</div>
+      <div class="notice">iPhoneでは共有画面が開きます。「画像を保存」を選ぶと写真フォルダに追加できます。</div>
 
       <div id="longResult"></div>
 
@@ -834,6 +865,67 @@ button:active{transform:scale(.975)!important}
       </div>
       <div id="compatResult" class="compat-result hidden"></div>
     </div>
+
+
+    <section id="betaSurvey" class="panel survey-panel" aria-labelledby="surveyTitle">
+      <div class="survey-intro">
+        <div class="kicker">BETA FEEDBACK</div>
+        <h2 id="surveyTitle" style="margin:8px 0 8px">30秒だけ、感想を教えてください</h2>
+        <p class="small" style="margin:0">LOVE STYLE MAPをより良くするためのβ版アンケートです。名前や個人情報は送信しません。</p>
+      </div>
+
+      <form id="betaSurveyForm" class="survey-form" novalidate>
+        <div class="survey-field">
+          <span class="survey-label">診断全体の満足度<span class="survey-required">必須</span></span>
+          <div class="survey-rating" role="radiogroup" aria-label="診断全体の満足度">
+            <div class="survey-choice"><input id="sat1" name="satisfaction" type="radio" value="1"><label for="sat1">1</label></div>
+            <div class="survey-choice"><input id="sat2" name="satisfaction" type="radio" value="2"><label for="sat2">2</label></div>
+            <div class="survey-choice"><input id="sat3" name="satisfaction" type="radio" value="3"><label for="sat3">3</label></div>
+            <div class="survey-choice"><input id="sat4" name="satisfaction" type="radio" value="4"><label for="sat4">4</label></div>
+            <div class="survey-choice"><input id="sat5" name="satisfaction" type="radio" value="5"><label for="sat5">5</label></div>
+          </div>
+          <div class="small" style="display:flex;justify-content:space-between;margin-top:7px"><span>いまひとつ</span><span>とても満足</span></div>
+        </div>
+
+        <div class="survey-field">
+          <span class="survey-label">診断結果はどのくらい当たっていると感じましたか？<span class="survey-required">必須</span></span>
+          <div class="survey-options" role="radiogroup" aria-label="診断結果の当たり具合">
+            <div class="survey-choice"><input id="acc1" name="accuracy" type="radio" value="かなり当たっている"><label for="acc1">かなり当たっている</label></div>
+            <div class="survey-choice"><input id="acc2" name="accuracy" type="radio" value="まあまあ当たっている"><label for="acc2">まあまあ当たっている</label></div>
+            <div class="survey-choice"><input id="acc3" name="accuracy" type="radio" value="どちらともいえない"><label for="acc3">どちらともいえない</label></div>
+            <div class="survey-choice"><input id="acc4" name="accuracy" type="radio" value="あまり当たっていない"><label for="acc4">あまり当たっていない</label></div>
+          </div>
+        </div>
+
+        <div class="survey-field">
+          <span class="survey-label">特に良かったものを教えてください</span>
+          <div class="survey-options">
+            <div class="survey-choice"><input id="fav1" name="favorite" type="radio" value="診断結果の文章"><label for="fav1">診断結果の文章</label></div>
+            <div class="survey-choice"><input id="fav2" name="favorite" type="radio" value="恋愛マップ・グラフ"><label for="fav2">恋愛マップ・グラフ</label></div>
+            <div class="survey-choice"><input id="fav3" name="favorite" type="radio" value="AI分析"><label for="fav3">AI分析</label></div>
+            <div class="survey-choice"><input id="fav4" name="favorite" type="radio" value="相性コード"><label for="fav4">相性コード</label></div>
+          </div>
+        </div>
+
+        <div class="survey-field">
+          <label class="survey-label" for="surveyComment">分かりにくかった点や、追加してほしい機能</label>
+          <textarea id="surveyComment" class="survey-textarea" maxlength="500" placeholder="自由に入力してください（任意）"></textarea>
+          <div class="small" style="text-align:right;margin-top:5px"><span id="surveyCount">0</span> / 500</div>
+        </div>
+
+        <p id="surveyError" class="survey-error hidden" role="alert">必須の2項目に回答してください。</p>
+        <button class="primary" type="submit" style="width:100%">アンケートに回答する</button>
+      </form>
+
+      <div id="surveyThanks" class="survey-thanks hidden" aria-live="polite">
+        <div class="survey-thanks-mark">✓</div>
+        <h3 style="margin:0 0 8px">回答ありがとうございます</h3>
+        <p class="small" style="margin:0">あなたの感想を、β版の改善に役立てます。</p>
+        <button id="shareSurveyButton" class="secondary survey-share" type="button">回答内容を運営者に共有</button>
+        <p class="small" style="margin:10px 0 0">共有ボタンからLINEやDMで送ることができます。</p>
+      </div>
+    </section>
+
 <button class="primary gold-action restart-gold" style="width:100%;margin-top:22px" onclick="restartAll()">もう一度診断する</button>
   </section>
 
@@ -867,8 +959,14 @@ button:active{transform:scale(.975)!important}
 <div id="adOverlay" class="ad-overlay hidden">
   <div class="ad-card">
     <div class="kicker">SPONSORED</div>
+    <h3 id="adTitle" style="margin:8px 0 0">コンテンツを準備しています</h3>
     <div class="ad-space">広告掲載スペース<br>（デモ表示）</div>
     <p id="adCount">準備しています…</p>
+    <div id="adGeneration" class="ad-generation hidden">
+      <div class="ad-generation-title">AI ANALYSIS PROCESS</div>
+      <div class="ad-generation-bar"><span id="adGenerationProgress"></span></div>
+      <div id="adGenerationStep" class="ad-generation-step">回答データを読み込んでいます…</div>
+    </div>
   </div>
 </div>
 
@@ -1194,9 +1292,52 @@ function shareResult(){
 }
 function saveResultImage(){
   if(!result)return;
-  const overlay=document.getElementById("adOverlay"),count=document.getElementById("adCount");
-  overlay.classList.remove("hidden");let n=3;count.textContent=`${n}秒後に画像を作成します`;
-  const timer=setInterval(()=>{n--;count.textContent=n>0?`${n}秒後に画像を作成します`:"画像を作成しています…";if(n<=0){clearInterval(timer);setTimeout(()=>{overlay.classList.add("hidden");createResultImage()},500)}},1000);
+  showSaveAdThen();
+}
+
+function showSaveAdThen(){
+  const overlay=document.getElementById("adOverlay");
+  const count=document.getElementById("adCount");
+  const card=overlay.querySelector(".ad-card");
+  const adTitle=document.getElementById("adTitle");
+  const generation=document.getElementById("adGeneration");
+  adTitle.textContent="保存用画像を準備しています";
+  generation.classList.add("hidden");
+  let saveButton=document.getElementById("adSaveContinueButton");
+  if(saveButton)saveButton.remove();
+
+  overlay.classList.remove("hidden");
+  let n=4;
+  count.textContent=`保存用画像を準備しています… ${n}秒`;
+
+  const timer=setInterval(()=>{
+    n--;
+    if(n>0){
+      count.textContent=`保存用画像を準備しています… ${n}秒`;
+      return;
+    }
+    clearInterval(timer);
+    count.textContent="広告の視聴が完了しました。";
+
+    saveButton=document.createElement("button");
+    saveButton.id="adSaveContinueButton";
+    saveButton.type="button";
+    saveButton.className="primary";
+    saveButton.style.cssText="width:100%;margin-top:14px";
+    saveButton.textContent="画像を保存する";
+    saveButton.addEventListener("pointerdown",()=>tone(740,.09,.022,"sine"),{once:true});
+    saveButton.addEventListener("click",()=>{
+      saveButton.disabled=true;
+      saveButton.textContent="保存画面を開いています…";
+      // この2回目のタップをユーザー操作として共有シートを即時表示する。
+      createResultImage();
+      setTimeout(()=>{
+        overlay.classList.add("hidden");
+        saveButton?.remove();
+      },180);
+    },{once:true});
+    card.appendChild(saveButton);
+  },1000);
 }
 function createResultImage(){
   const c=document.createElement("canvas");c.width=1080;c.height=1600;
@@ -1220,10 +1361,38 @@ function createResultImage(){
   });
   x.textAlign="center";x.fillStyle="#aaa39b";x.font="28px sans-serif";x.fillText("LSM CODE",540,1185);
   x.fillStyle="#f0d8aa";x.font="700 42px monospace";x.fillText(result.code,540,1245);
-  const url=c.toDataURL("image/png");
-  const a=document.createElement("a");a.href=url;a.download=`love-style-map-${result.type.name.replace(/\s/g,"-")}.png`;
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>alert("画像が開いた場合は、画像を長押しして「写真に保存」を選んでください。"),400);
+  const fileName=`love-style-map-${result.type.name.replace(/\s/g,"-")}.png`;
+  const dataUrl=c.toDataURL("image/png");
+
+  // 同期的にFileへ変換し、タップ操作が有効な間にiPhoneの共有シートを開く。
+  try{
+    const base64=dataUrl.split(",")[1];
+    const binary=atob(base64);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    const imageFile=new File([bytes],fileName,{type:"image/png"});
+    const shareData={files:[imageFile]};
+
+    if(navigator.share && (!navigator.canShare || navigator.canShare(shareData))){
+      navigator.share(shareData).catch(error=>{
+        if(error?.name!=="AbortError")downloadResultImage(dataUrl,fileName);
+      });
+      return;
+    }
+  }catch(error){
+    console.warn("写真共有を開始できませんでした",error);
+  }
+
+  downloadResultImage(dataUrl,fileName);
+}
+function downloadResultImage(dataUrl,fileName){
+  const a=document.createElement("a");
+  a.href=dataUrl;
+  a.download=fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>alert("画像を保存しました。iPhoneで画像が開いた場合は、共有ボタンから『画像を保存』を選んでください。"),250);
 }
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){
   let line="";const chars=[...text];
@@ -1320,18 +1489,44 @@ function startAIWithAd(){
 function showAdThen(callback,message){
   const overlay=document.getElementById("adOverlay");
   const count=document.getElementById("adCount");
+  const adTitle=document.getElementById("adTitle");
+  const generation=document.getElementById("adGeneration");
+  const progress=document.getElementById("adGenerationProgress");
+  const step=document.getElementById("adGenerationStep");
+  document.getElementById("adSaveContinueButton")?.remove();
+
+  adTitle.textContent="AI分析を生成しています";
+  generation.classList.remove("hidden");
+  progress.style.width="8%";
+  step.textContent="16問の回答データを読み込んでいます…";
   overlay.classList.remove("hidden");
+
+  const stages=[
+    ["回答の一貫性を確認しています…","32%"],
+    ["4つの恋愛傾向を照合しています…","57%"],
+    ["無意識の恋愛パターンを分析しています…","79%"],
+    ["あなた専用の文章を生成しています…","94%"]
+  ];
   let n=4;
-  count.textContent=`${message}… ${n}秒`;
+  let stageIndex=0;
+  count.textContent=`広告終了まで ${n}秒`;
   const timer=setInterval(()=>{
     n--;
-    count.textContent=n>0?`${message}… ${n}秒`:"分析を開いています…";
+    if(stageIndex<stages.length){
+      step.textContent=stages[stageIndex][0];
+      progress.style.width=stages[stageIndex][1];
+      stageIndex++;
+    }
+    count.textContent=n>0?`広告終了まで ${n}秒`:"AI分析レポートを開いています…";
     if(n<=0){
       clearInterval(timer);
+      progress.style.width="100%";
+      step.textContent="分析レポートが完成しました。";
       setTimeout(()=>{
         overlay.classList.add("hidden");
+        generation.classList.add("hidden");
         callback();
-      },500);
+      },650);
     }
   },1000);
 }
@@ -2379,75 +2574,78 @@ function drawCanvasRadar(ctx,cx,cy,R,vals,labels,theme){
 <script>
 function playDiagnosisStartSound(){
   if(typeof soundEnabled!=="undefined" && !soundEnabled)return;
-
   try{
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     if(!AudioContextClass)return;
-
     audioCtx=audioCtx||new AudioContextClass();
 
     const play=()=>{
-      const now=audioCtx.currentTime;
+      const now=audioCtx.currentTime+.005;
+      const master=audioCtx.createGain();
+      master.gain.setValueAtTime(.72,now);
+      master.connect(audioCtx.destination);
 
-      // 最初の「起動」感を出す短い打音
-      const impact=audioCtx.createOscillator();
-      const impactGain=audioCtx.createGain();
-      impact.type="triangle";
-      impact.frequency.setValueAtTime(180,now);
-      impact.frequency.exponentialRampToValueAtTime(360,now+.08);
-      impactGain.gain.setValueAtTime(.0001,now);
-      impactGain.gain.exponentialRampToValueAtTime(.055,now+.008);
-      impactGain.gain.exponentialRampToValueAtTime(.0001,now+.12);
-      impact.connect(impactGain);
-      impactGain.connect(audioCtx.destination);
-      impact.start(now);
-      impact.stop(now+.14);
+      // 柔らかな低音「トゥン」
+      const body=audioCtx.createOscillator();
+      const bodyGain=audioCtx.createGain();
+      body.type="sine";
+      body.frequency.setValueAtTime(196,now);
+      body.frequency.exponentialRampToValueAtTime(146.83,now+.28);
+      bodyGain.gain.setValueAtTime(.0001,now);
+      bodyGain.gain.exponentialRampToValueAtTime(.075,now+.012);
+      bodyGain.gain.exponentialRampToValueAtTime(.0001,now+.46);
+      body.connect(bodyGain);bodyGain.connect(master);
+      body.start(now);body.stop(now+.5);
 
-      // 523Hz → 659Hz → 880Hz の上昇音
-      const notes=[
-        {f:523.25,start:.055,d:.19,v:.042},
-        {f:659.25,start:.145,d:.23,v:.046},
-        {f:880.00,start:.255,d:.42,v:.052}
-      ];
-
-      notes.forEach((note,index)=>{
+      // 上品な倍音を薄く重ねる
+      [293.66,440].forEach((freq,index)=>{
         const osc=audioCtx.createOscillator();
         const gain=audioCtx.createGain();
-        osc.type=index===2?"sine":"triangle";
-        osc.frequency.setValueAtTime(note.f,now+note.start);
-
-        gain.gain.setValueAtTime(.0001,now+note.start);
-        gain.gain.exponentialRampToValueAtTime(note.v,now+note.start+.018);
-        gain.gain.exponentialRampToValueAtTime(.0001,now+note.start+note.d);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now+note.start);
-        osc.stop(now+note.start+note.d+.03);
+        osc.type="sine";
+        osc.frequency.setValueAtTime(freq,now+.045+index*.035);
+        gain.gain.setValueAtTime(.0001,now+.045+index*.035);
+        gain.gain.exponentialRampToValueAtTime(index? .013:.019,now+.075+index*.035);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+.62+index*.10);
+        osc.connect(gain);gain.connect(master);
+        osc.start(now+.045+index*.035);osc.stop(now+.75+index*.10);
       });
 
-      // 最後に薄い高音の余韻を重ねる
+      // 空気が上へ抜ける「シュー…」
+      const duration=.82;
+      const buffer=audioCtx.createBuffer(1,Math.ceil(audioCtx.sampleRate*duration),audioCtx.sampleRate);
+      const data=buffer.getChannelData(0);
+      for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*(1-i/data.length);
+      const noise=audioCtx.createBufferSource();
+      const filter=audioCtx.createBiquadFilter();
+      const noiseGain=audioCtx.createGain();
+      noise.buffer=buffer;
+      filter.type="bandpass";
+      filter.Q.value=.75;
+      filter.frequency.setValueAtTime(620,now+.08);
+      filter.frequency.exponentialRampToValueAtTime(3600,now+.72);
+      noiseGain.gain.setValueAtTime(.0001,now+.08);
+      noiseGain.gain.exponentialRampToValueAtTime(.018,now+.20);
+      noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.82);
+      noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(master);
+      noise.start(now+.08);noise.stop(now+.90);
+
+      // 最後に小さな光の余韻
       const shimmer=audioCtx.createOscillator();
       const shimmerGain=audioCtx.createGain();
       shimmer.type="sine";
-      shimmer.frequency.setValueAtTime(1320,now+.31);
-      shimmer.frequency.exponentialRampToValueAtTime(1760,now+.60);
-      shimmerGain.gain.setValueAtTime(.0001,now+.31);
-      shimmerGain.gain.exponentialRampToValueAtTime(.018,now+.36);
-      shimmerGain.gain.exponentialRampToValueAtTime(.0001,now+.70);
-      shimmer.connect(shimmerGain);
-      shimmerGain.connect(audioCtx.destination);
-      shimmer.start(now+.31);
-      shimmer.stop(now+.72);
+      shimmer.frequency.setValueAtTime(783.99,now+.28);
+      shimmer.frequency.exponentialRampToValueAtTime(1046.5,now+.66);
+      shimmerGain.gain.setValueAtTime(.0001,now+.28);
+      shimmerGain.gain.exponentialRampToValueAtTime(.012,now+.36);
+      shimmerGain.gain.exponentialRampToValueAtTime(.0001,now+.92);
+      shimmer.connect(shimmerGain);shimmerGain.connect(master);
+      shimmer.start(now+.28);shimmer.stop(now+.96);
 
-      if(navigator.vibrate)navigator.vibrate(18);
+      if(navigator.vibrate)navigator.vibrate(8);
     };
 
-    if(audioCtx.state==="suspended"){
-      audioCtx.resume().then(play).catch(()=>{});
-    }else{
-      play();
-    }
+    if(audioCtx.state==="suspended")audioCtx.resume().then(play).catch(()=>{});
+    else play();
   }catch(e){}
 }
 </script>
@@ -2455,6 +2653,59 @@ function playDiagnosisStartSound(){
 
 <script>
 (function(){
+  let titleActivated=false;
+
+  function playTitleEnterSound(){
+    if(typeof soundEnabled!=="undefined" && !soundEnabled)return;
+    try{
+      const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+      if(!AudioContextClass)return;
+      audioCtx=audioCtx||new AudioContextClass();
+
+      const fire=()=>{
+        const now=audioCtx.currentTime+.003;
+        const master=audioCtx.createGain();
+        master.gain.setValueAtTime(.68,now);
+        master.connect(audioCtx.destination);
+
+        // 水晶ベルのような「チーン…」。基音とごく薄い倍音で高級感を出す。
+        const partials=[
+          {f:783.99,v:.030,d:1.05,t:0},
+          {f:1567.98,v:.010,d:.82,t:.004},
+          {f:2351.97,v:.0045,d:.55,t:.008},
+          {f:987.77,v:.010,d:.88,t:.055}
+        ];
+        partials.forEach(note=>{
+          const osc=audioCtx.createOscillator();
+          const gain=audioCtx.createGain();
+          osc.type="sine";
+          osc.frequency.setValueAtTime(note.f,now+note.t);
+          gain.gain.setValueAtTime(.0001,now+note.t);
+          gain.gain.exponentialRampToValueAtTime(note.v,now+note.t+.008);
+          gain.gain.exponentialRampToValueAtTime(.0001,now+note.t+note.d);
+          osc.connect(gain);gain.connect(master);
+          osc.start(now+note.t);osc.stop(now+note.t+note.d+.03);
+        });
+
+        // 遠くで光るような短い余韻
+        const echo=audioCtx.createOscillator();
+        const echoGain=audioCtx.createGain();
+        echo.type="sine";
+        echo.frequency.setValueAtTime(1318.51,now+.20);
+        echoGain.gain.setValueAtTime(.0001,now+.20);
+        echoGain.gain.exponentialRampToValueAtTime(.0065,now+.24);
+        echoGain.gain.exponentialRampToValueAtTime(.0001,now+.95);
+        echo.connect(echoGain);echoGain.connect(master);
+        echo.start(now+.20);echo.stop(now+1.0);
+
+        if(navigator.vibrate)navigator.vibrate(6);
+      };
+
+      if(audioCtx.state==="suspended")audioCtx.resume().then(fire).catch(()=>{});
+      else fire();
+    }catch(e){}
+  }
+
   window.closeTitleScreen=function(){
     const screen=document.getElementById('titleScreen');
     if(!screen||screen.classList.contains('is-closing'))return;
@@ -2463,14 +2714,27 @@ function playDiagnosisStartSound(){
     setTimeout(()=>screen.remove(),950);
   };
 
+  function activateTitle(event){
+    if(titleActivated)return;
+    titleActivated=true;
+    if(event)event.preventDefault();
+    playTitleEnterSound();
+    requestAnimationFrame(()=>closeTitleScreen());
+  }
+
   function initTitleScreen(){
     const screen=document.getElementById('titleScreen');
-    if(!screen)return;
+    const enter=document.getElementById('titleEnter');
+    if(!screen||!enter)return;
     document.body.style.overflow='hidden';
+
+    // clickより早いpointerdownで鳴らし、iPhoneの体感遅延を抑える。
+    enter.addEventListener('pointerdown',activateTitle,{passive:false});
+    enter.addEventListener('click',activateTitle,{passive:false});
+
     document.addEventListener('keydown',function(event){
       if((event.key==='Enter'||event.key==='Escape'||event.key===' ')&&document.getElementById('titleScreen')){
-        event.preventDefault();
-        closeTitleScreen();
+        activateTitle(event);
       }
     });
   }
@@ -2479,6 +2743,88 @@ function playDiagnosisStartSound(){
   }else{
     initTitleScreen();
   }
+})();
+</script>
+
+
+<script>
+/* LOVE STYLE MAP — β feedback survey */
+(function(){
+  const form=document.getElementById('betaSurveyForm');
+  const thanks=document.getElementById('surveyThanks');
+  const error=document.getElementById('surveyError');
+  const comment=document.getElementById('surveyComment');
+  const count=document.getElementById('surveyCount');
+  const shareButton=document.getElementById('shareSurveyButton');
+  let latestFeedback=null;
+
+  function selected(name){
+    return form?.querySelector(`input[name="${name}"]:checked`)?.value||'';
+  }
+  function feedbackText(data){
+    return [
+      'LOVE STYLE MAP β版アンケート',
+      `満足度：${data.satisfaction}/5`,
+      `当たり具合：${data.accuracy}`,
+      `良かったもの：${data.favorite||'未回答'}`,
+      `改善点・要望：${data.comment||'なし'}`,
+      `診断タイプ：${data.resultType||'不明'}`
+    ].join('\n');
+  }
+  function showThanks(){
+    if(form)form.classList.add('hidden');
+    if(thanks)thanks.classList.remove('hidden');
+  }
+  if(comment&&count){
+    comment.addEventListener('input',()=>{count.textContent=String(comment.value.length)});
+  }
+  form?.addEventListener('submit',event=>{
+    event.preventDefault();
+    const satisfaction=selected('satisfaction');
+    const accuracy=selected('accuracy');
+    if(!satisfaction||!accuracy){
+      error?.classList.remove('hidden');
+      form.querySelector('input:not(:checked)')?.focus();
+      return;
+    }
+    error?.classList.add('hidden');
+    latestFeedback={
+      satisfaction:Number(satisfaction),
+      accuracy,
+      favorite:selected('favorite'),
+      comment:(comment?.value||'').trim(),
+      resultType:document.getElementById('typeName')?.textContent?.trim()||'',
+      createdAt:new Date().toISOString(),
+      version:'3.2-beta'
+    };
+    try{
+      const stored=JSON.parse(localStorage.getItem('lsmBetaFeedback')||'[]');
+      const list=Array.isArray(stored)?stored:[];
+      list.push(latestFeedback);
+      localStorage.setItem('lsmBetaFeedback',JSON.stringify(list.slice(-30)));
+      localStorage.setItem('lsmBetaSurveyAnswered','1');
+    }catch(e){}
+    showThanks();
+    tone?.(720,.08,.025);
+  });
+  shareButton?.addEventListener('click',async()=>{
+    if(!latestFeedback){
+      try{
+        const stored=JSON.parse(localStorage.getItem('lsmBetaFeedback')||'[]');
+        latestFeedback=Array.isArray(stored)?stored.at(-1):null;
+      }catch(e){}
+    }
+    if(!latestFeedback)return;
+    const text=feedbackText(latestFeedback);
+    try{
+      if(navigator.share){
+        await navigator.share({title:'LOVE STYLE MAP β版アンケート',text});
+      }else{
+        await navigator.clipboard.writeText(text);
+        shareButton.textContent='回答内容をコピーしました';
+      }
+    }catch(e){}
+  });
 })();
 </script>
 
