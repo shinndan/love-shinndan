@@ -696,16 +696,50 @@ button:active{transform:scale(.975)!important}
 /* v3.3 safety: pre-diagnosis compatibility-only screen is permanently disabled */
 #compatOnly,[data-screen="compat-only"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
-/* BUILD 3.4: legacy pre-diagnosis compatibility screen is forbidden */
+/* BUILD 4.0: legacy pre-diagnosis compatibility screen is forbidden */
 #compatOnly, #compatibilityOnly, .compat-only, [data-screen="compat-only"], [data-view="compat-only"]{
   display:none!important; visibility:hidden!important; pointer-events:none!important; height:0!important; overflow:hidden!important;
+}
+
+
+
+/* LOVE STYLE MAP 4.0 — paged result experience */
+.result-pager{display:grid;gap:18px}
+.result-slide{display:none;animation:resultPageIn .38s cubic-bezier(.2,.8,.2,1)}
+.result-slide.is-active{display:block}
+.result-slide>.panel,.result-slide.panel{margin-top:0}
+.result-slide .result-head{margin:0;padding-top:30px}
+.result-page-top{position:sticky;top:0;z-index:40;margin:0 0 14px;padding:12px 10px 10px;background:linear-gradient(180deg,rgba(8,9,13,.97),rgba(8,9,13,.84),transparent);backdrop-filter:blur(14px)}
+.result-page-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px;letter-spacing:.1em}
+.result-page-track{height:4px;margin-top:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.result-page-track span{display:block;height:100%;width:10%;border-radius:inherit;background:linear-gradient(90deg,var(--theme),var(--theme-soft));transition:width .35s ease}
+.result-page-nav{display:grid;grid-template-columns:1fr 1.35fr;gap:10px;margin:18px 0 6px}
+.result-page-nav button{min-height:58px}
+.result-page-nav .result-next:only-child{grid-column:1/-1}
+.result-page-nav.is-first{grid-template-columns:1fr}
+.result-page-title{margin:0 0 18px;text-align:center}
+.result-page-title h2{font-size:clamp(27px,6vw,38px);margin:7px 0 5px}
+.result-page-title p{margin:0;color:var(--muted)}
+#resultLongStaging{display:none!important}
+.result-profile-stack,.result-summary-stack{display:grid;gap:14px}
+.result-profile-stack .section,.result-summary-stack .section{margin:0!important}
+.ai-report-empty{padding:30px 18px;text-align:center;border:1px dashed rgba(var(--theme-rgb),.32);border-radius:20px;color:var(--muted)}
+.result-slide[data-page="7"] #aiAnalysis:not(.hidden){margin-top:0}
+.result-slide[data-page="7"] #precisionArea,.result-slide[data-page="7"] #aiQuestionArea{margin-top:16px!important}
+@keyframes resultPageIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+@media(max-width:620px){
+  .result-page-top{margin-left:-2px;margin-right:-2px}
+  .result-page-nav{position:sticky;bottom:max(8px,env(safe-area-inset-bottom));z-index:45;padding:10px;background:rgba(8,9,13,.9);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(18px)}
+  .result-page-nav button{min-height:54px;padding:13px 10px}
+  .result-slide>.panel{padding:20px}
+  .result-slide[data-page="0"]>.panel{padding:0;overflow:hidden}
 }
 
 </style>
 </head>
 <body>
 <script>
-/* BUILD 3.4 boot guard: the title can only lead to the nickname start screen. */
+/* BUILD 4.0 boot guard: the title can only lead to the nickname start screen. */
 (function(){
   function removeLegacyCompatibilityScreen(){
     ["compatOnly","compatibilityOnly"].forEach(function(id){
@@ -726,10 +760,13 @@ button:active{transform:scale(.975)!important}
   document.addEventListener("DOMContentLoaded",removeLegacyCompatibilityScreen,{once:true});
   window.addEventListener("pageshow",removeLegacyCompatibilityScreen);
 })();
+
+
+
 </script>
 
 
-<!-- TITLE SCREEN VERIFIED v5: NAME INPUT ONLY / BUILD 3.4 -->
+<!-- TITLE SCREEN VERIFIED v5: NAME INPUT ONLY / BUILD 4.0 -->
 <div id="titleScreen" class="title-screen" aria-label="LOVE STYLE MAP タイトル画面" role="dialog" aria-modal="true">
   <div class="title-screen-inner">
     <div class="title-screen-kicker">YOUR RELATIONSHIP BLUEPRINT</div>
@@ -747,7 +784,7 @@ button:active{transform:scale(.975)!important}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 3.4</span></span>
+    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 4.0</span></span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -2863,6 +2900,163 @@ function playDiagnosisStartSound(){
 })();
 </script>
 
+
+<script>
+/* LOVE STYLE MAP 4.0 — split long result into guided pages */
+let resultPageIndex=0;
+const RESULT_PAGE_LABELS=[
+  "恋愛タイプ","恋愛マップ","9つの数値","分析精度","基本プロフィール",
+  "診断まとめ","AI分析","AI個人レポート","相性分析","アンケート"
+];
+
+function makeResultSlide(index,label){
+  const slide=document.createElement("section");
+  slide.className="result-slide";
+  slide.dataset.page=String(index);
+  slide.setAttribute("aria-label",label);
+  return slide;
+}
+function makeResultPanel(){
+  const panel=document.createElement("div");
+  panel.className="panel";
+  return panel;
+}
+function makeResultPageTitle(kicker,title,body=""){
+  const box=document.createElement("div");
+  box.className="result-page-title";
+  box.innerHTML=`<div class="kicker">${kicker}</div><h2>${title}</h2>${body?`<p>${body}</p>`:""}`;
+  return box;
+}
+
+function setupResultPager(){
+  const screen=document.getElementById("resultScreen");
+  if(!screen||document.getElementById("resultPager"))return;
+  const sourcePanel=screen.querySelector(":scope > .panel");
+  if(!sourcePanel)return;
+
+  const head=sourcePanel.querySelector(".result-head");
+  const map=sourcePanel.querySelector(".map-visual-card");
+  const stats=document.getElementById("stats");
+  const precision=sourcePanel.querySelector(".precision-card");
+  const actions=sourcePanel.querySelector(".actions");
+  const notice=sourcePanel.querySelector(".notice");
+  const staging=document.getElementById("longResult");
+  const aiSection=[...sourcePanel.querySelectorAll(":scope > .section")].find(el=>el.querySelector("#aiHeading"));
+  const compat=document.getElementById("compatibilitySection");
+  const survey=document.getElementById("betaSurvey");
+  const restart=[...screen.querySelectorAll(":scope > button")].find(b=>b.textContent.includes("もう一度診断"));
+
+  const top=document.createElement("div");
+  top.className="result-page-top";
+  top.innerHTML=`<div class="result-page-meta"><span id="resultPageLabel">${RESULT_PAGE_LABELS[0]}</span><span id="resultPageCount">1 / ${RESULT_PAGE_LABELS.length}</span></div><div class="result-page-track"><span id="resultPageProgress"></span></div>`;
+
+  const host=document.createElement("div");
+  host.id="resultPager";
+  host.className="result-pager";
+
+  const slides=RESULT_PAGE_LABELS.map((label,i)=>makeResultSlide(i,label));
+
+  const p0=makeResultPanel(); p0.append(head); slides[0].append(p0);
+  const p1=makeResultPanel(); p1.append(map); slides[1].append(p1);
+  const p2=makeResultPanel(); p2.append(makeResultPageTitle("YOUR NUMBERS","9つの恋愛傾向","回答から読み取れた特徴を、数値で確認できます。"),stats); slides[2].append(p2);
+  const p3=makeResultPanel(); p3.append(precision,actions,notice); slides[3].append(p3);
+
+  const p4=makeResultPanel();
+  p4.append(makeResultPageTitle("CORE PROFILE","あなたの恋愛プロフィール","文章を3つに分けて、読みやすく整理しました。"));
+  const profileHost=document.createElement("div");profileHost.id="resultProfileHost";profileHost.className="result-profile-stack";p4.append(profileHost);slides[4].append(p4);
+
+  const p5=makeResultPanel();
+  p5.append(makeResultPageTitle("AI SUMMARY","診断から見えたこと","最後に、今のあなたへ一つだけ提案します。"));
+  const summaryHost=document.createElement("div");summaryHost.id="resultSummaryHost";summaryHost.className="result-summary-stack";p5.append(summaryHost);slides[5].append(p5);
+
+  const aiAnalysis=document.getElementById("aiAnalysis");
+  const precisionArea=document.getElementById("precisionArea");
+  const aiQuestionArea=document.getElementById("aiQuestionArea");
+  const p6=makeResultPanel();p6.append(aiSection);slides[6].append(p6);
+  const p7=makeResultPanel();
+  p7.append(makeResultPageTitle("AI PERSONAL REPORT","あなたの恋愛の核","AI分析を実行すると、ここに詳しい個人レポートが表示されます。"));
+  const empty=document.createElement("div");empty.id="aiReportEmpty";empty.className="ai-report-empty";empty.textContent="前のページで「AI分析をもう一度見る」を押すと、個人レポートが作成されます。";
+  p7.append(empty,aiAnalysis,precisionArea,aiQuestionArea);slides[7].append(p7);
+
+  slides[8].append(compat);
+  slides[9].append(survey);
+  if(restart)slides[9].append(restart);
+
+  slides.forEach(slide=>host.append(slide));
+  staging.id="resultLongStaging";
+  screen.insertBefore(top,screen.firstChild.nextSibling);
+  screen.insertBefore(host,top.nextSibling);
+  screen.append(staging);
+  sourcePanel.remove();
+
+  const nav=document.createElement("div");
+  nav.id="resultPageNav";
+  nav.className="result-page-nav";
+  nav.innerHTML=`<button id="resultPrev" class="secondary" type="button">← 戻る</button><button id="resultNext" class="primary gold-action" type="button">次へ →</button>`;
+  screen.insertBefore(nav,staging);
+  document.getElementById("resultPrev").addEventListener("click",()=>showResultPage(resultPageIndex-1));
+  document.getElementById("resultNext").addEventListener("click",()=>showResultPage(resultPageIndex+1));
+  showResultPage(0,false);
+}
+
+function refreshPagedLongResult(){
+  const staging=document.getElementById("resultLongStaging");
+  const profile=document.getElementById("resultProfileHost");
+  const summary=document.getElementById("resultSummaryHost");
+  if(!staging||!profile||!summary)return;
+  profile.innerHTML="";summary.innerHTML="";
+  const sections=[...staging.querySelectorAll(":scope > .section")];
+  sections.forEach((section,i)=>{
+    if(section.textContent.includes("今日の小さな一歩"))section.classList.add("today-action");
+    (i<3?profile:summary).append(section);
+  });
+}
+
+function showResultPage(index,scroll=true){
+  const slides=[...document.querySelectorAll("#resultPager .result-slide")];
+  if(!slides.length)return;
+  resultPageIndex=Math.max(0,Math.min(index,slides.length-1));
+  slides.forEach((slide,i)=>slide.classList.toggle("is-active",i===resultPageIndex));
+  const count=document.getElementById("resultPageCount");
+  const label=document.getElementById("resultPageLabel");
+  const progress=document.getElementById("resultPageProgress");
+  const prev=document.getElementById("resultPrev");
+  const next=document.getElementById("resultNext");
+  const nav=document.getElementById("resultPageNav");
+  if(count)count.textContent=`${resultPageIndex+1} / ${slides.length}`;
+  if(label)label.textContent=RESULT_PAGE_LABELS[resultPageIndex];
+  if(progress)progress.style.width=`${((resultPageIndex+1)/slides.length)*100}%`;
+  if(prev)prev.classList.toggle("hidden",resultPageIndex===0);
+  if(nav)nav.classList.toggle("is-first",resultPageIndex===0);
+  if(next)next.textContent=resultPageIndex===slides.length-1?"診断結果の最初へ":"次へ →";
+  if(scroll)document.getElementById("resultScreen")?.scrollIntoView({behavior:"smooth",block:"start"});
+  if(resultPageIndex===1&&result)setTimeout(()=>drawRadar(),80);
+  if(resultPageIndex===7){
+    const empty=document.getElementById("aiReportEmpty");
+    if(empty)empty.classList.toggle("hidden",!document.getElementById("aiAnalysis")?.classList.contains("hidden"));
+  }
+  if(resultPageIndex===slides.length-1&&next)next.onclick=()=>showResultPage(0);
+  else if(next)next.onclick=null;
+}
+
+setupResultPager();
+const pagedShowResult=showResult;
+showResult=function(){
+  pagedShowResult();
+  refreshPagedLongResult();
+  resultPageIndex=0;
+  showResultPage(0,false);
+};
+
+const originalGenerateAIAnalysisForPages=generateAIAnalysis;
+generateAIAnalysis=function(){
+  originalGenerateAIAnalysisForPages();
+  const empty=document.getElementById("aiReportEmpty");
+  if(empty)empty.classList.add("hidden");
+  setTimeout(()=>showResultPage(7),120);
+};
+
+</script>
 </body>
 </html>
-<!-- LOVE STYLE MAP BUILD 3.4 / PRE-DIAGNOSIS COMPATIBILITY SCREEN REMOVED -->
+<!-- LOVE STYLE MAP BUILD 4.0 / PRE-DIAGNOSIS COMPATIBILITY SCREEN REMOVED -->
