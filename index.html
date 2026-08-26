@@ -727,7 +727,6 @@ button:active{transform:scale(.975)!important}
           placeholder="名前・ニックネームを入力"
           autocomplete="nickname">
         <button id="startDiagnosisButton" class="primary" onclick="startQuiz()">名前を入れて診断をはじめる</button>
-        <button class="secondary" onclick="showCompatibilityOnly()">相性コードを入力する</button>
       </div>
       <p id="nameError" class="small hidden" style="color:#e6a0a0;margin-top:10px">
         名前またはニックネームを入力してください。
@@ -929,19 +928,6 @@ button:active{transform:scale(.975)!important}
 <button class="primary gold-action restart-gold" style="width:100%;margin-top:22px" onclick="restartAll()">もう一度診断する</button>
   </section>
 
-  <section id="compatOnly" class="panel hidden">
-    <h2 class="compat-title">相性コード分析</h2>
-    <p class="small" style="text-align:center">まず自分のコード、次に相手のコードを入力します。</p>
-    <div class="compat-form">
-      <input id="myCodeOnly" class="compat-input" maxlength="14" placeholder="自分のLSM CODE">
-      <input id="partnerCodeOnly" class="compat-input" maxlength="14" placeholder="相手のLSM CODE">
-      <div class="relations" id="relationsOnly"></div>
-      <button class="primary" onclick="analyzeCompatibilityOnly()">相性を分析する</button>
-      <button class="ghost" onclick="restartAll()">トップへ戻る</button>
-    </div>
-    <div id="compatResultOnly" class="compat-result hidden"></div>
-  </section>
-
   <div class="footer">© LOVE STYLE MAP — 恋愛を当てるのではなく、理解する。</div>
 </div>
 
@@ -1058,7 +1044,7 @@ function startQuiz(){
   },520);
 }
 function hideAll(){
-  ["startScreen","quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+  ["startScreen","quizScreen","loadingScreen","resultScreen"].forEach(id=>document.getElementById(id).classList.add("hidden"));
 }
 function showQuestion(){
   const item=sessionQuestions[current];
@@ -1270,10 +1256,7 @@ function showCompatibility(out,myVals,partner,relation){
   <div class="tip">💡 関係を深める鍵：${d.advice}</div>
   <p class="small" style="margin-top:14px">相手のタイプ：${partner.type.icon} ${partner.type.name}</p>`;
 }
-function showCompatibilityOnly(){
-  hideAll();document.getElementById("compatOnly").classList.remove("hidden");
-  renderRelations("relationsOnly",true);
-}
+
 function analyzeCompatibilityOnly(){
   const mine=decodeCode(document.getElementById("myCodeOnly").value);
   const partner=decodeCode(document.getElementById("partnerCodeOnly").value);
@@ -2717,16 +2700,13 @@ function playDiagnosisStartSound(){
   function forceNameStartScreen(){
     // iPhone/Safariの画面復元（bfcache）も含め、ENTER後の表示先を必ず名前入力画面に固定する。
     if(typeof hideAll==="function") hideAll();
-    else ["startScreen","quizScreen","loadingScreen","resultScreen","compatOnly"].forEach(id=>{
+    else ["startScreen","quizScreen","loadingScreen","resultScreen"].forEach(id=>{
       document.getElementById(id)?.classList.add("hidden");
     });
 
     const start=document.getElementById("startScreen");
-    const compat=document.getElementById("compatOnly");
     start?.classList.remove("hidden");
     start?.removeAttribute("style");
-    compat?.classList.add("hidden");
-    if(compat) compat.style.display="";
     window.scrollTo({top:0,behavior:"auto"});
   }
 
