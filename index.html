@@ -784,7 +784,7 @@ button:active{transform:scale(.975)!important}
 <div class="wrap">
   <div class="brand">
     <span>LOVE STYLE MAP</span>
-    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 4.3</span></span>
+    <span class="brand-tools"><button id="soundToggle" class="sound-toggle" type="button" aria-label="効果音の切り替え">SOUND ON</button><span class="badge">LOVE STYLE MAP 4.4</span></span>
   </div>
 
   <section id="startScreen" class="panel">
@@ -2902,7 +2902,7 @@ function playDiagnosisStartSound(){
 
 
 <script>
-/* LOVE STYLE MAP 4.3 — split long result into guided pages */
+/* LOVE STYLE MAP 4.4 — split long result into guided pages */
 let resultPageIndex=0;
 const RESULT_PAGE_LABELS=[
   "恋愛タイプ","恋愛マップ","9つの数値","分析精度","基本プロフィール",
@@ -3057,13 +3057,14 @@ generateAIAnalysis=function(){
   originalGenerateAIAnalysisForPages();
   const empty=document.getElementById("aiReportEmpty");
   if(empty)empty.classList.add("hidden");
-  setTimeout(()=>showResultPage(7),120);
+  /* AI生成後は順番どおり5ページ目へ進む。 */
+  setTimeout(()=>showResultPage(4),120);
 };
 
 </script>
 
 <style>
-/* LOVE STYLE MAP 4.3 — result illustration, number cards and action-page refinement */
+/* LOVE STYLE MAP 4.4 — result illustration, number cards and action-page refinement */
 .result-slide[data-page="0"] .type-icon{
   display:grid!important;
   place-items:center!important;
@@ -3129,7 +3130,7 @@ generateAIAnalysis=function(){
 }
 </style>
 <script>
-/* BUILD 4.3 hardening: always paint the type symbol and all nine values. */
+/* BUILD 4.4 hardening: always paint the type symbol and all nine values. */
 (function(){
   function metricValues(){
     if(!window.result || !result.metrics) return null;
@@ -3184,11 +3185,133 @@ generateAIAnalysis=function(){
     };
   }
   document.addEventListener('DOMContentLoaded',function(){
-    var badge=document.querySelector('.badge'); if(badge)badge.textContent='LOVE STYLE MAP 4.3';
+    var badge=document.querySelector('.badge'); if(badge)badge.textContent='LOVE STYLE MAP 4.4';
+  });
+})();
+</script>
+
+
+<style>
+/* LOVE STYLE MAP 4.4 — guaranteed symbols and precision-page navigation */
+.result-slide[data-page="0"] #typeIcon{
+  position:relative!important;
+  z-index:2!important;
+  display:grid!important;
+  place-items:center!important;
+  width:132px!important;
+  height:132px!important;
+  min-width:132px!important;
+  min-height:132px!important;
+  margin:28px auto 24px!important;
+  visibility:visible!important;
+  opacity:1!important;
+  overflow:visible!important;
+}
+.result-slide[data-page="0"] #typeIcon svg{
+  display:block!important;
+  width:120px!important;
+  height:120px!important;
+  min-width:120px!important;
+  min-height:120px!important;
+  overflow:visible!important;
+}
+/* 4ページ目はAIボタンだけで先へ進むため、下部の「次へ」を表示しない。 */
+#resultPageNav.precision-ai-only{
+  grid-template-columns:1fr!important;
+}
+#resultPageNav.precision-ai-only #resultNext{
+  display:none!important;
+}
+@media(max-width:620px){
+  .result-slide[data-page="0"] #typeIcon{width:120px!important;height:120px!important;min-width:120px!important;min-height:120px!important}
+  .result-slide[data-page="0"] #typeIcon svg{width:110px!important;height:110px!important;min-width:110px!important;min-height:110px!important}
+}
+</style>
+<script>
+/* BUILD 4.4 hardening */
+(function(){
+  var SYMBOL_GROUPS={
+    'Moon Harbor':'moon','Solar Bloom':'sun','Velvet Flame':'flame','Crystal Compass':'compass',
+    'Golden Anchor':'anchor','Aurora Pulse':'aurora','Gentle Orbit':'orbit','Rose Signal':'rose',
+    'Midnight Echo':'echo','Honey Crown':'crown','Blue Lantern':'lantern','Wild Meteor':'meteor',
+    'Ivory Garden':'garden','Ruby Tide':'ruby','Silver Feather':'feather','Emerald Bridge':'bridge'
+  };
+
+  function currentResult(){
+    try{return (typeof result!=='undefined'&&result)?result:null;}catch(e){return null;}
+  }
+
+  function forcePaintSymbol(){
+    var r=currentResult();
+    var el=document.getElementById('typeIcon');
+    if(!r||!r.type||!el)return;
+    var theme=null;
+    try{theme=typeThemes[r.type.name]||applyTypeTheme(r.type);}catch(e){}
+    var group=(theme&&theme.group)||SYMBOL_GROUPS[r.type.name]||'orbit';
+    var color=(theme&&(theme.soft||theme.main))||'#f4d996';
+    try{
+      el.innerHTML=iconSVG(group,color);
+      var svg=el.querySelector('svg');
+      if(svg){
+        svg.setAttribute('width','120');
+        svg.setAttribute('height','120');
+        svg.style.display='block';
+        svg.style.visibility='visible';
+        svg.style.opacity='1';
+        svg.querySelectorAll('[stroke]').forEach(function(node){node.setAttribute('stroke',color);});
+        svg.querySelectorAll('[fill]:not([fill="none"])').forEach(function(node){node.setAttribute('fill',color);});
+      }
+    }catch(e){
+      el.textContent=r.type.icon||'✦';
+      el.style.fontSize='82px';
+      el.style.color=color;
+    }
+    el.style.display='grid';
+    el.style.visibility='visible';
+    el.style.opacity='1';
+  }
+
+  function updatePrecisionNavigation(index){
+    var nav=document.getElementById('resultPageNav');
+    var next=document.getElementById('resultNext');
+    if(!nav||!next)return;
+    var isPrecision=Number(index)===3;
+    nav.classList.toggle('precision-ai-only',isPrecision);
+    next.setAttribute('aria-hidden',isPrecision?'true':'false');
+  }
+
+  var priorPage=window.showResultPage;
+  if(typeof priorPage==='function'){
+    window.showResultPage=function(index,scroll){
+      priorPage.apply(this,arguments);
+      updatePrecisionNavigation(index);
+      if(Number(index)===0){
+        forcePaintSymbol();
+        requestAnimationFrame(forcePaintSymbol);
+        setTimeout(forcePaintSymbol,80);
+        setTimeout(forcePaintSymbol,400);
+      }
+    };
+  }
+
+  var priorShow=window.showResult;
+  if(typeof priorShow==='function'){
+    window.showResult=function(){
+      priorShow.apply(this,arguments);
+      forcePaintSymbol();
+      requestAnimationFrame(forcePaintSymbol);
+      setTimeout(forcePaintSymbol,100);
+      setTimeout(forcePaintSymbol,700);
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded',function(){
+    var badge=document.querySelector('.badge');
+    if(badge)badge.textContent='LOVE STYLE MAP 4.4';
   });
 })();
 </script>
 
 </body>
 </html>
-<!-- LOVE STYLE MAP BUILD 4.3 / SYMBOL, GOLD LABELS, ACTION PAGE -->
+<!-- LOVE STYLE MAP BUILD 4.4 / SYMBOL, GOLD LABELS, ACTION PAGE -->
